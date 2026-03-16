@@ -1,4 +1,5 @@
 export const petsData = [
+  // Existing pets (1-17) - unchanged
   {
     id: 1,
     name: "Buddy",
@@ -12,7 +13,9 @@ export const petsData = [
     price: null,
     description: "Buddy is a friendly Golden Retriever who got scared during Diwali fireworks and ran off. He is microchipped and wearing a blue collar with tags. Very friendly with people and other dogs.",
     location: "Andheri, Mumbai",
-    contact: "+91 98765 43210"
+    contact: "+91 98765 43210",
+    ownerId: 1,
+    featured: true
   },
   {
     id: 2,
@@ -22,12 +25,14 @@ export const petsData = [
     gender: "Female",
     image: "https://images.unsplash.com/photo-1574158622682-e40e69881006?w=400&h=300&fit=crop",
     distance: "1.2 km",
-    status: "Adoption",
+    status: "adoption",
     tags: ["Cat", "Indoor", "Spayed"],
     price: "₹3,000",
     description: "Whiskers is a beautiful Persian cat looking for her forever home. She is very calm, loves to cuddle, and gets along well with other cats.",
     location: "Koramangala, Bangalore",
-    contact: "+91 98765 43211"
+    contact: "+91 98765 43211",
+    ownerId: 3,
+    featured: true
   },
   {
     id: 3,
@@ -42,7 +47,9 @@ export const petsData = [
     price: null,
     description: "Found this handsome German Shepherd near Lodhi Gardens. He appears well-trained and friendly. Currently being kept safe while we find his owner.",
     location: "Lodhi Gardens, Delhi",
-    contact: "+91 98765 43212"
+    contact: "+91 98765 43212",
+    ownerId: 4,
+    featured: true
   },
   {
     id: 4,
@@ -52,12 +59,14 @@ export const petsData = [
     gender: "Female",
     image: "https://images.unsplash.com/photo-1513245543132-31f507417b26?w=400&h=300&fit=crop",
     distance: "0.8 km",
-    status: "Adoption",
+    status: "adoption",
     tags: ["Cat", "Kitten", "Playful"],
     price: "₹1,500",
     description: "Luna is an adorable Siamese mix kitten full of energy and love. She loves to play and would do best in a home with other playful cats or gentle dogs.",
     location: "T Nagar, Chennai",
-    contact: "+91 98765 43213"
+    contact: "+91 98765 43213",
+    ownerId: 3,
+    featured: true
   },
   {
     id: 5,
@@ -72,7 +81,9 @@ export const petsData = [
     price: null,
     description: "Rocky is a sweet Bulldog with a distinctive snore. He got out of the backyard yesterday. He is friendly but might be scared. Has a red collar.",
     location: "Salt Lake, Kolkata",
-    contact: "+91 98765 43214"
+    contact: "+91 98765 43214",
+    ownerId: 2,
+    featured: true
   },
   {
     id: 6,
@@ -82,12 +93,14 @@ export const petsData = [
     gender: "Female",
     image: "https://images.unsplash.com/photo-1606214174585-fe31582dc6ee?w=400&h=300&fit=crop",
     distance: "1.5 km",
-    status: "Adoption",
+    status: "adoption",
     tags: ["Cat", "Fluffy", "Gentle"],
     price: "₹4,000",
     description: "Mittens is a majestic Maine Coon with a gentle personality. She is perfect for families and gets along great with children. Already spayed and vaccinated.",
     location: "Banjara Hills, Hyderabad",
-    contact: "+91 98765 43215"
+    contact: "+91 98765 43215",
+    ownerId: 3,
+    featured: true
   },
   {
     id: 7,
@@ -102,7 +115,8 @@ export const petsData = [
     price: null,
     description: "Found this sweet Beagle wandering near the neighborhood. Very friendly and well-behaved. No collar but appears well cared for.",
     location: "Koregaon Park, Pune",
-    contact: "+91 98765 43216"
+    contact: "+91 98765 43216",
+    ownerId: 4
   },
   {
     id: 8,
@@ -112,12 +126,13 @@ export const petsData = [
     gender: "Female",
     image: "https://images.unsplash.com/photo-1495360010541-f48722b34f7d?w=400&h=300&fit=crop",
     distance: "2.2 km",
-    status: "Adoption",
+    status: "adoption",
     tags: ["Cat", "Curious", "Active"],
     price: "₹1,000",
     description: "Cleo is an energetic Tabby kitten looking for her forever family. She loves to explore and play. Great with other pets.",
     location: "MG Road, Gurgaon",
-    contact: "+91 98765 43217"
+    contact: "+91 98765 43217",
+    ownerId: 3
   },
   {
     id: 9,
@@ -132,7 +147,8 @@ export const petsData = [
     price: null,
     description: "Simba is a loving Labrador who escaped during a walk. He is friendly, wearing a brown leather collar with a bell. Fully vaccinated and microchipped.",
     location: "Jubilee Hills, Hyderabad",
-    contact: "+91 98765 43218"
+    contact: "+91 98765 43218",
+    ownerId: 2
   },
   {
     id: 10,
@@ -147,7 +163,8 @@ export const petsData = [
     price: null,
     description: "Found this energetic little terrier near Cubbon Park. Very playful and well-trained. Responds to 'Milo' - possibly his name.",
     location: "Cubbon Park, Bangalore",
-    contact: "+91 98765 43219"
+    contact: "+91 98765 43219",
+    ownerId: 4
   },
   {
     id: 11,
@@ -157,12 +174,13 @@ export const petsData = [
     gender: "Female",
     image: "https://images.unsplash.com/photo-1596492784531-6e6eb5ea9993?w=400&h=300&fit=crop",
     distance: "1.8 km",
-    status: "Adoption",
+    status: "adoption",
     tags: ["Dog", "Indie", "Loyal"],
     price: "₹2,000",
     description: "Tara is a beautiful indie dog with the most loyal nature. Great with kids and other pets. Fully vaccinated and dewormed.",
     location: "Vasant Kunj, Delhi",
-    contact: "+91 98765 43220"
+    contact: "+91 98765 43220",
+    ownerId: 2
   },
   {
     id: 12,
@@ -172,12 +190,224 @@ export const petsData = [
     gender: "Male",
     image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&h=300&fit=crop",
     distance: "0.4 km",
-    status: "Adoption",
+    status: "adoption",
     tags: ["Cat", "Domestic", "Calm"],
     price: "₹500",
     description: "Oreo is a calm and affectionate Indian domestic shorthair cat. Perfect for apartments. Already neutered and litter-trained.",
     location: "Powai, Mumbai",
-    contact: "+91 98765 43221"
+    contact: "+91 98765 43221",
+    ownerId: 3
+  },
+  {
+    id: 13,
+    name: "Shadow",
+    breed: "Indie Dog",
+    age: "1 year",
+    gender: "Female",
+    image: "https://images.unsplash.com/photo-1561037404-61cd46aa615b?w=400&h=300&fit=crop",
+    distance: "1.1 km",
+    status: "Lost",
+    tags: ["Dog", "Indie", "Shy"],
+    price: null,
+    description: "Shadow is a sweet indie dog with a white patch on her chest. Very shy but loves treats. Last seen near local market.",
+    location: "Bandra West, Mumbai",
+    contact: "+91 98765 43222",
+    ownerId: 1
+  },
+  {
+    id: 14,
+    name: "Tiger",
+    breed: "Street Cat",
+    age: "3 years",
+    gender: "Male",
+    image: "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=400&h=300&fit=crop",
+    distance: "2.3 km",
+    status: "Lost",
+    tags: ["Cat", "Orange", "Adventurous"],
+    price: null,
+    description: "Orange tabby cat called Tiger. Distinctive white paws. Not neutered. Friendly with children.",
+    location: "Juhu Beach, Mumbai",
+    contact: "+91 98765 43223",
+    ownerId: 5
+  },
+  {
+    id: 15,
+    name: "Bella",
+    breed: "Labrador Mix",
+    age: "18 months",
+    gender: "Female",
+    image: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=400&h=300&fit=crop",
+    distance: "0.9 km",
+    status: "Lost",
+    tags: ["Dog", "Lab Mix", "Energetic"],
+    price: null,
+    description: "Bella escaped from backyard during walk. Chocolate brown with white chest. Very playful, responds to whistle.",
+    location: "Versova, Mumbai",
+    contact: "+91 98765 43224",
+    ownerId: 6,
+    featured: true
+  },
+  {
+    id: 16,
+    name: "Snowball",
+    breed: "White Persian",
+    age: "2 years",
+    gender: "Female",
+    image: "https://images.unsplash.com/photo-1606785642762-e140bc7b678e?w=400&h=300&fit=crop",
+    distance: "3.2 km",
+    status: "Lost",
+    tags: ["Cat", "Fluffy", "Indoor"],
+    price: null,
+    description: "Snowball is pure white Persian cat. Blue eyes. Indoor only cat, very gentle. Blue collar with bell.",
+    location: "Malad West, Mumbai",
+    contact: "+91 98765 43225",
+    ownerId: 7
+  },
+  {
+    id: 17,
+    name: "Rex",
+    breed: "Indie Dog",
+    age: "1 year",
+    gender: "Male",
+    image: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=400&h=400&fit=crop",
+    distance: "1.4 km",
+    status: "Lost",
+    tags: ["Dog", "Indie", "Playful"],
+    price: null,
+    description: "Rex is a playful indie dog with black and white spots. Escaped during evening walk. Very friendly, knows basic commands.",
+    location: "Goregaon East, Mumbai",
+    contact: "+91 98765 43226",
+    ownerId: 8,
+    featured: true
+  },
+  // 8 NEW ADOPTION PETS (id 18-25)
+  {
+    id: 18,
+    name: "Leo",
+    breed: "Ragdoll Cat",
+    age: "1.5 years",
+    gender: "Male",
+    image: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=300&fit=crop",
+    distance: "1.8 km",
+    status: "adoption",
+    tags: ["Cat", "Fluffy", "Loving"],
+    price: "₹2,500",
+    description: "Leo is a gorgeous Ragdoll with stunning blue eyes. Very affectionate and goes limp when you hold him (classic Ragdoll trait). Perfect family cat.",
+    location: "Juhu, Mumbai",
+    contact: "+91 98765 43227",
+    ownerId: 9,
+    featured: true
+  },
+  {
+    id: 19,
+    name: "Duke",
+    breed: "Labrador Retriever",
+    age: "3 years",
+    gender: "Male",
+    image: "https://images.unsplash.com/photo-1544543788-8f4906d80e2f?w=400&h=300&fit=crop",
+    distance: "2.1 km",
+    status: "adoption",
+    tags: ["Dog", "Family", "Trained"],
+    price: "₹0", // Free to good home
+    description: "Duke is a gentle giant who loves everyone. House trained, knows basic commands. Ready for his forever family.",
+    location: "Powder Nagar, Delhi",
+    contact: "+91 98765 43228",
+    ownerId: 10
+  },
+  {
+    id: 20,
+    name: "Pepper",
+    breed: "Black Labrador",
+    age: "2 years",
+    gender: "Female",
+    image: "https://images.unsplash.com/photo-1576201836107-db1758fd1c97?w=400&h=300&fit=crop",
+    distance: "0.6 km",
+    status: "adoption",
+    tags: ["Dog", "Active", "Smart"],
+    price: "₹3,500",
+    description: "Pepper is energetic black lab who loves fetch and long walks. Excellent obedience training. Great with kids.",
+    location: "Whitefield, Bangalore",
+    contact: "+91 98765 43229",
+    ownerId: 11
+  },
+  {
+    id: 21,
+    name: "Smokey",
+    breed: "Russian Blue",
+    age: "4 years",
+    gender: "Male",
+    status: "adoption",
+    tags: ["Cat", "Elegant", "Quiet"],
+    price: "₹2,000",
+    description: "Smokey is a beautiful Russian Blue with velvety fur. Very quiet and independent, perfect for apartment living.",
+    location: "Anna Nagar, Chennai",
+    contact: "+91 98765 43230",
+    ownerId: 12,
+    image: "https://images.unsplash.com/photo-1535424720792-8d5b1e5b2b3a?w=400&h=300&fit=crop"
+  },
+  {
+    id: 22,
+    name: "Riley",
+    breed: "Golden Retriever",
+    age: "18 months",
+    gender: "Female",
+    image: "https://images.unsplash.com/photo-1541795795328-f0737b846c0f?w=400&h=300&fit=crop",
+    distance: "1.3 km",
+    status: "adoption",
+    tags: ["Dog", "Golden", "Therapy"],
+    price: "₹4,500",
+    description: "Riley is therapy dog trained and incredibly gentle. Perfect for families or elderly. Loves everyone she meets.",
+    location: "Sector 18, Noida",
+    contact: "+91 98765 43231",
+    ownerId: 13
+  },
+  {
+    id: 23,
+    name: "Jasper",
+    breed: "British Shorthair",
+    age: "2.5 years",
+    gender: "Male",
+    image: "https://images.unsplash.com/photo-1561948955-570b270e7c36?w=400&h=300&fit=crop",
+    distance: "2.5 km",
+    status: "adoption",
+    tags: ["Cat", "Round", "Chill"],
+    price: "₹3,200",
+    description: "Jasper is the ultimate chill cat with his round face and plush fur. Loves laps and quiet evenings.",
+    location: "Satellite, Ahmedabad",
+    contact: "+91 98765 43232",
+    ownerId: 14
+  },
+  {
+    id: 24,
+    name: "Finn",
+    breed: "Beagle Mix",
+    age: "1 year",
+    gender: "Male",
+    image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=300&fit=crop",
+    distance: "0.9 km",
+    status: "adoption",
+    tags: ["Dog", "Hound", "Playful"],
+    price: "₹1,800",
+    description: "Finn is a happy beagle mix with classic hound markings. Loves to sniff and explore. Great adventure companion.",
+    location: "Hinjewadi, Pune",
+    contact: "+91 98765 43233",
+    ownerId: 15
+  },
+  {
+    id: 25,
+    name: "Lily",
+    breed: "Sphynx",
+    age: "3 years",
+    gender: "Female",
+    image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=300&fit=crop",
+    distance: "1.7 km",
+    status: "adoption",
+    tags: ["Cat", "Hairless", "Affectionate"],
+    price: "₹5,000",
+    description: "Lily is a unique Sphynx cat with wrinkly skin and huge personality. Very warm to touch and super loving.",
+    location: "Kalyan Nagar, Bangalore",
+    contact: "+91 98765 43234",
+    ownerId: 16
   }
 ];
 
@@ -189,7 +419,6 @@ export const categories = [
   { id: 'adoption', name: 'Adoption', icon: '🏠' }
 ];
 
-// Indian cities for dropdown
 export const indianCities = [
   "Mumbai",
   "Delhi",

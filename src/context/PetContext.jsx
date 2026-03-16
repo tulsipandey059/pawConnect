@@ -12,7 +12,11 @@ export const usePets = () => {
 };
 
 export const PetProvider = ({ children }) => {
-  const [pets, setPets] = useState(petsData);
+  const [pets, setPets] = useState([]); 
+
+  React.useEffect(() => {
+    setPets(petsData);
+  }, []);
 
   const addPet = (petData) => {
     const newPet = {

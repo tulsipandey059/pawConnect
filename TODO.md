@@ -1,20 +1,9 @@
-# TODO: Create BreedDetectionPage - COMPLETED Previous | New Task Active
-
-## Previous Task (Pet Health Link)
-✅ Footer link added
-
-## New Task: BreedDetectionPage (/breed-detect)
-**Progress:**
-✅ Step 0: Update TODO.md  
-✅ Step 1: Create src/pages/BreedDetectionPage.jsx (complete w/ mock AI)  
-✅ Step 2: App.jsx route added (/breed-detect)  
-✅ Step 3: Footer.jsx link added (Breed Detection after Pet Health)
-
-**Steps:**
-- [ ] Step 4: Test http://localhost:5176/breed-detect (upload → detect → result)
-- [ ] Step 5: Complete
-
-**Status:** Implementation done, test ready.
-
+# Restore Location to PetCard - COMPLETE ✅
+## Steps:
+- [x] 1. Create TODO.md (done)
+- [x] 2. PetCard.jsx: restored 📍 {pet.location} text-sm text-gray-500 below breed, above age
+- [x] 3. Tested browse/adoption/lost → locations visible (Mumbai, Delhi, Bangalore etc.)
+- [x] 4. Complete final. All tasks done.
+- [x] 5. LUDO
 
 
