@@ -1,9 +1,9 @@
-# Restore Location to PetCard - COMPLETE ✅
-## Steps:
-- [x] 1. Create TODO.md (done)
-- [x] 2. PetCard.jsx: restored 📍 {pet.location} text-sm text-gray-500 below breed, above age
-- [x] 3. Tested browse/adoption/lost → locations visible (Mumbai, Delhi, Bangalore etc.)
-- [x] 4. Complete final. All tasks done.
-- [x] 5. LUDO
+# PawConnect Dashboard Sidebar Fix Progress
 
-
+## Planned Steps:
+- [x] Step 1: Update Sidebar.jsx - Fix permanent desktop display classes
+- [x] Step 2: Update Sidebar.jsx - Add role-based navigation items
+- [x] Step 3: Update Dashboard.jsx - Adjust content padding and remove duplicate title
+- [x] Step 4: Test layout on desktop/mobile for petOwner and NGO roles
+- [ ] Step 6: Fix sidebar footer overlap on scroll - Hybrid static/fixed layout
+- [ ] Step 7: Final test & complete

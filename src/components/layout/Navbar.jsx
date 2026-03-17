@@ -93,9 +93,6 @@ const Navbar = () => {
             </div>
             {isAuthenticated ? (
               <div className="flex items-center space-x-3 ml-auto">
-                <Link to="/dashboard" className="text-text-dark hover:text-primary-orange transition-colors duration-300 font-medium">
-                  Dashboard
-                </Link>
                 {/* Optional Notification Bell */}
                 <Link to="/notifications" className="p-1.5 rounded-xl hover:bg-light-accent transition-colors relative group">
                   <svg className="w-6 h-6 text-text-dark group-hover:text-primary-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,12 +106,6 @@ const Navbar = () => {
                     {currentUser?.name?.charAt(0)?.toUpperCase() || 'U'}
                   </div>
                 </Link>
-                <button 
-                  onClick={handleLogout} 
-                  className="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-xl font-medium text-sm shadow-sm hover:shadow-md transition-all ml-2"
-                >
-                  Logout
-                </button>
               </div>
             ) : (
               <Link to="/login" className="bg-primary-orange text-white px-6 py-2.5 rounded-full font-medium hover:bg-orange-400 transition-all duration-300 shadow-soft hover:shadow-lg ml-auto">
@@ -188,9 +179,6 @@ const Navbar = () => {
               {isAuthenticated ? (
                 <>
                   <div className="border-t border-gray-200 pt-4 px-4">
-                    <Link to="/dashboard" className="block py-3 text-text-dark hover:text-primary-orange transition-colors font-medium border-l-4 border-transparent hover:border-primary-orange" onClick={() => setIsOpen(false)}>
-                      Dashboard
-                    </Link>
                     {/* Notification Bell Mobile */}
                     <Link to="/notifications" className="flex items-center space-x-3 py-3 text-text-dark hover:text-primary-orange transition-colors font-medium border-l-4 border-transparent hover:border-primary-orange" onClick={() => setIsOpen(false)}>
                       <div className="relative">
@@ -208,9 +196,6 @@ const Navbar = () => {
                       </div>
                       <span className="font-semibold">{currentUser?.role || 'User'}</span>
                     </Link>
-                    <button onClick={handleLogout} className="w-full mt-2 bg-red-100 hover:bg-red-200 text-red-700 py-3 px-4 rounded-xl font-bold text-sm shadow-sm hover:shadow-md transition-all">
-                      Logout
-                    </button>
                   </div>
                 </>
               ) : (
