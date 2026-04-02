@@ -26,12 +26,9 @@ const AddPetPage = () => {
     setLoading(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      const newPet = addPet(formData);
+      const newPet = await addPet(formData);
       alert('Pet added successfully!');
-      navigate(`/pet/${newPet.id}`);
+      navigate(`/pet/${newPet.id}` || '/browse');
     } catch (error) {
       alert('Error adding pet. Please try again.');
     } finally {

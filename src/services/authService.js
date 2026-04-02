@@ -1,27 +1,53 @@
-// Auth Service
-import apiClient from './api.js';
+// Mock Auth Service - LocalStorage based simulation
+// No backend dependency
 
 export const authService = {
   login: async (credentials) => {
-    // Mock API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    return { success: true, user: { id: 1, name: 'Test User', role: 'petOwner' } };
+    try {
+      // Simulate validation
+      if (credentials.email === 'demo@pawconnect.com' && credentials.password === 'demo123') {
+        const mockUser = { 
+          id: 1, 
+          name: 'Demo User', 
+          email: credentials.email, 
+          role: 'user' 
+        };
+        localStorage.setItem('token', 'mock-jwt-token');
+        localStorage.setItem('currentUser', JSON.stringify(mockUser));
+        return { success: true, user: mockUser, token: 'mock-jwt-token' };
+      }
+      throw new Error('Invalid credentials');
+    } catch (error) {
+      throw new Error(error.message || 'Login failed');
+    }
   },
 
   register: async (userData) => {
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    return { success: true, user: { ...userData, id: Date.now() } };
+    try {
+      // Simulate registration
+      const mockUser = { 
+        id: Date.now(), 
+        ...userData,
+        role: 'user'
+      };
+      localStorage.setItem('token', 'mock-jwt-token');
+      localStorage.setItem('currentUser', JSON.stringify(mockUser));
+      return { success: true, user: mockUser, token: 'mock-jwt-token' };
+    } catch (error) {
+      throw new Error(error.message || 'Registration failed');
+    }
   },
 
-  logout: async () => {
-    await new Promise(resolve => setTimeout(resolve, 500));
+  logout: () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('currentUser');
     return { success: true };
   },
 
-  getCurrentUser: async () => {
-    return localStorage.getItem('currentUser') ? JSON.parse(localStorage.getItem('currentUser')) : null;
+  getCurrentUser: () => {
+    const user = localStorage.getItem('currentUser');
+    return user ? JSON.parse(user) : null;
   }
 };
 
 export default authService;
-

@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
-import { petsData } from '../data/pets';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import petService from '../services/petService.js';
 
 const PetContext = createContext();
 
@@ -13,38 +13,52 @@ export const usePets = () => {
 
 export const PetProvider = ({ children }) => {
   const [pets, setPets] = useState([]); 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  React.useEffect(() => {
-    setPets(petsData);
-  }, []);
-
-  const addPet = (petData) => {
-    const newPet = {
-      id: pets.length + 1,
-      ...petData,
-      // Set default values for missing fields
-      gender: petData.gender || 'Unknown',
-      distance: '0 km',
-      tags: petData.tags || [],
-      contact: petData.contact || '+91 98765 43210',
-      // Ensure status is properly capitalized for filtering
-      status: petData.status === 'adoption' ? 'Adoption' : 
-              petData.status === 'lost' ? 'Lost' : 
-              petData.status === 'found' ? 'Found' : petData.status
+  useEffect(() => {
+    const fetchPets = async () => {
+      try {
+        setLoading(true);
+        const fetchedPets = await petService.getPets();
+        setPets(fetchedPets);
+        setError(null);
+      } catch (err) {
+        console.error('Failed to load pets:', err);
+        setError('Using mock fallback data');
+        // Fallback to static data
+        const { petsData } = await import('../data/pets.js');
+        setPets(petsData);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    setPets(prevPets => [newPet, ...prevPets]);
-    return newPet;
+    fetchPets();
+  }, []);
+
+  const addPet = async (petData) => {
+    try {
+      const newPet = await petService.createPet(petData);
+      setPets(prevPets => [newPet, ...prevPets]);
+      return newPet;
+    } catch (err) {
+      console.error('Failed to add pet:', err);
+      throw err;
+    }
   };
 
   const getPetById = (id) => {
-    return pets.find(pet => pet.id === parseInt(id));
+    return pets.find(pet => pet.id === parseInt(id) || pet.id == id);
   };
 
   const value = {
     pets,
+    loading,
+    error,
     addPet,
-    getPetById
+    getPetById,
+    refetchPets: () => {/* implement if needed */}
   };
 
   return (
@@ -55,4 +69,3 @@ export const PetProvider = ({ children }) => {
 };
 
 export default PetContext;
-

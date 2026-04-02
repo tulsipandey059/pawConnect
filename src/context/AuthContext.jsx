@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { authService } from '../services/authService.js';
 
 const AuthContext = createContext();
 
@@ -15,35 +16,50 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check localStorage on mount
-    const user = localStorage.getItem('currentUser');
+    const user = authService.getCurrentUser();
     if (user) {
-      setCurrentUser(JSON.parse(user));
+      setCurrentUser(user);
     }
     setLoading(false);
-
-    // Listen for login event from auth pages
-    const handleLogin = (e) => {
-      setCurrentUser(e.detail);
-    };
-    window.addEventListener('login', handleLogin);
-
-    return () => window.removeEventListener('login', handleLogin);
   }, []);
 
-  const login = (userData) => {
-    localStorage.setItem('currentUser', JSON.stringify(userData));
-    setCurrentUser(userData);
+  const login = async (credentials) => {
+    try {
+      const result = await authService.login(credentials);
+      if (result.success) {
+        setCurrentUser(result.user);
+        // Dispatch custom event for other components
+        window.dispatchEvent(new CustomEvent('login', { detail: result.user }));
+      }
+      return result;
+    } catch (error) {
+      throw error;
+    }
   };
 
-  const logout = () => {
-    localStorage.removeItem('currentUser');
+  const register = async (userData) => {
+    try {
+      const result = await authService.register(userData);
+      if (result.success) {
+        setCurrentUser(result.user);
+        window.dispatchEvent(new CustomEvent('login', { detail: result.user }));
+      }
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const logout = async () => {
+    await authService.logout();
     setCurrentUser(null);
+    window.dispatchEvent(new CustomEvent('logout'));
   };
 
   const value = {
     currentUser,
     login,
+    register,
     logout,
     isAuthenticated: !!currentUser,
     loading
@@ -57,4 +73,3 @@ export const AuthProvider = ({ children }) => {
 };
 
 export default AuthContext;
-
