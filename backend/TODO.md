@@ -1,11 +1,12 @@
-# Backend TODO Progress
+# Backend TODO Progress Tracker
 
 ## Completed:
-- [x] Create .env with MONGO_URI, JWT_SECRET, etc. (fixes DB connection crash)
+- [x] Set up environment variables (MongoDB URI, JWT_SECRET, Cloudinary config)
+
+## Completed:
+- [x] Install dependencies: `cd backend && npm install`
+- [x] Start development server: `cd backend && npm run dev`
 
 ## Next Steps:
-- [ ] Run `cd backend && npm run dev` to test server + DB connection
-- [ ] Verify "MongoDB Connected: cluster0..." log
-- [ ] Sign up for MongoDB Atlas/Cloudinary if needed and update .env (don't commit .env)
-- [ ] Test API endpoints (auth, pets)
-- [ ] Frontend integration
+- [ ] Test API: Visit http://localhost:5000/api/test or use curl http://localhost:5000/api/test
+- [ ] Verify MongoDB connection and Cloudinary config in the running server logs
