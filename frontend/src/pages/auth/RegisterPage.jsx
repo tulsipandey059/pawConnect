@@ -17,11 +17,13 @@ const RegisterPage = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showLoginSuggestion, setShowLoginSuggestion] = useState(false);
 
-  const roles = [
-    { value: 'user', label: 'Pet Owner', icon: '🏠' },
+const roles = [
+    { value: 'owner', label: 'Pet Owner', icon: '🏠' },
+    { value: 'ngo', label: 'NGO', icon: '🏢' },
     { value: 'volunteer', label: 'Volunteer', icon: '❤️' },
-    { value: 'ngo', label: 'NGO', icon: '🏢' }
+    { value: 'admin', label: 'Admin', icon: '👑' }
   ];
 
   const handleChange = (e) => {
@@ -80,7 +82,12 @@ const RegisterPage = () => {
 
     } catch (error) {
       console.error('Registration error:', error);
-      setServerError(error.message || 'Registration failed. Please try again.');
+      if (error.message === 'User already exists with this email') {
+        setShowLoginSuggestion(true);
+        setTimeout(() => setShowLoginSuggestion(false), 5000);
+      } else {
+        setServerError(error.message || 'Registration failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -200,7 +207,13 @@ const RegisterPage = () => {
             ))}
           </div>
 
-          {serverError && <p className="text-red-500">{serverError}</p>}
+{serverError && <p className="text-red-500 bg-red-50 p-3 rounded-xl">{serverError}</p>}
+          {showLoginSuggestion && (
+            <div className="p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg text-sm text-gray-700">
+              Already have an account?{' '}
+              <Link to="/login" className="font-semibold text-primary-orange hover:underline">Login here</Link>
+            </div>
+          )}
 
           <button
             type="submit"
