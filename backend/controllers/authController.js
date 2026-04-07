@@ -1,109 +1,140 @@
-const User = require("../models/User");
 const asyncHandler = require("../utils/asyncHandler");
-const generateToken = require("../utils/generateToken");
+const User = require("../models/User");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
-// @desc    Register a new user
-// @route   POST /api/auth/register
-// @access  Public
+// 🔑 Generate JWT
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET || "secret123", {
+    expiresIn: "7d",
+  });
+};
+
+// =========================
+// ✅ REGISTER USER
+// =========================
 exports.register = asyncHandler(async (req, res) => {
-  const { name, email, password, phone, city } = req.body;
+  console.log('📝 Register attempt:', req.body); // DEBUG
 
-  const user = await User.create({ name, email, password, phone, city });
-  const token = generateToken(user._id);
+  const { name, email, password, role = 'user', phone = '', city = '' } = req.body;
+
+  // Validate required fields
+  if (!name?.trim()) {
+    const error = new Error("Name is required");
+    error.statusCode = 400;
+    throw error;
+  }
+  if (!email?.trim()) {
+    const error = new Error("Email is required");
+    error.statusCode = 400;
+    throw error;
+  }
+  if (!password || password.length < 6) {
+    const error = new Error("Password must be at least 6 characters");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  // Check existing user
+  const existingUser = await User.findOne({ email: email.trim().toLowerCase() });
+  if (existingUser) {
+    const error = new Error("User already exists with this email");
+    error.statusCode = 409;
+    throw error;
+  }
+
+  // Create user
+  const user = await User.create({
+    name: name.trim(),
+    email: email.trim().toLowerCase(),
+    password,
+    role,
+    phone: phone.trim(),
+    city: city.trim(),
+  });
+
+  console.log('✅ User created:', user._id); // DEBUG
 
   res.status(201).json({
     success: true,
-    message: "Registration successful",
-    token,
+    token: generateToken(user._id),
     user: {
-      _id: user._id,
+      id: user._id,
       name: user.name,
       email: user.email,
+      role: user.role,
       phone: user.phone,
       city: user.city,
-      role: user.role,
     },
   });
 });
 
-// @desc    Login user
-// @route   POST /api/auth/login
-// @access  Public
+// =========================
+// ✅ LOGIN USER
+// =========================
 exports.login = asyncHandler(async (req, res) => {
+  console.log('🔐 Login attempt:', req.body.email); // DEBUG
+
   const { email, password } = req.body;
 
-  const user = await User.findOne({ email }).select("+password");
-  if (!user || !(await user.comparePassword(password))) {
-    return res.status(401).json({ success: false, message: "Invalid email or password" });
+  if (!email?.trim() || !password) {
+    const error = new Error("Email and password required");
+    error.statusCode = 400;
+    throw error;
   }
 
-  const token = generateToken(user._id);
+  const user = await User.findOne({ email: email.trim().toLowerCase() });
+  if (!user) {
+    const error = new Error("Invalid credentials");
+    error.statusCode = 401;
+    throw error;
+  }
 
-  res.json({
+  const isMatch = await user.matchPassword(password);
+  if (!isMatch) {
+    const error = new Error("Invalid credentials");
+    error.statusCode = 401;
+    throw error;
+  }
+
+  console.log('✅ Login success:', user._id); // DEBUG
+
+  res.status(200).json({
     success: true,
     message: "Login successful",
-    token,
+    token: generateToken(user._id),
     user: {
-      _id: user._id,
+      id: user._id,
       name: user.name,
       email: user.email,
-      phone: user.phone,
-      city: user.city,
       role: user.role,
     },
   });
 });
 
-// @desc    Get current logged-in user
-// @route   GET /api/auth/me
-// @access  Private
+// =========================
+// ✅ GET CURRENT USER
+// =========================
 exports.getMe = asyncHandler(async (req, res) => {
-  res.json({ success: true, user: req.user });
+  const user = await User.findById(req.user.id).select("-password");
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
 });
 
-// @desc    Update profile
-// @route   PUT /api/auth/me
-// @access  Private
+// =========================
+// (OPTIONAL PLACEHOLDERS)
+// =========================
 exports.updateProfile = asyncHandler(async (req, res) => {
-  const { name, phone, city, avatar } = req.body;
-
-  const user = await User.findByIdAndUpdate(
-    req.user._id,
-    { name, phone, city, avatar },
-    { new: true, runValidators: true }
-  );
-
-  res.json({ success: true, message: "Profile updated", user });
+  res.json({ message: "Update profile (not implemented yet)" });
 });
 
-// @desc    Google OAuth callback
-// @route   GET /api/auth/google/callback
-// @access  Public
-exports.googleCallback = asyncHandler(async (req, res) => {
-  if (!req.user) {
-    return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/login?error=google_auth_failed`);
-  }
-
-  const token = generateToken(req.user._id);
-  
-  // Redirect to frontend with token
-  const frontendUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard#token=${token}`;
-  res.redirect(frontendUrl);
-});
-
-// @desc    Change password
-// @route   PUT /api/auth/change-password
-// @access  Private
 exports.changePassword = asyncHandler(async (req, res) => {
-  const { currentPassword, newPassword } = req.body;
+  res.json({ message: "Change password (not implemented yet)" });
+});
 
-  const user = await User.findById(req.user._id).select("+password");
-  if (!(await user.comparePassword(currentPassword))) {
-    return res.status(400).json({ success: false, message: "Current password is incorrect" });
-  }
-
-  user.password = newPassword;
-  await user.save();
-
-  res.json({ success: true, message: "Password changed successfully" });
+exports.googleCallback = asyncHandler(async (req, res) => {
+  res.json({ message: "Google auth success (implement redirect later)" });
 });

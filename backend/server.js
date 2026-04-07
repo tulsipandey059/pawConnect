@@ -19,7 +19,13 @@ const app = express();
 
 // ─── Core Middleware ──────────────────────────────────────────────────────────
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: [
+    process.env.FRONTEND_URL,
+    'http://localhost:3000', 
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:5175'
+  ].filter(Boolean),
   credentials: true
 }));
 app.use(express.json());
@@ -83,3 +89,4 @@ app.listen(PORT, () => {
   console.log(`🚀  Server  → http://localhost:${PORT}  [${process.env.NODE_ENV || "development"}]`);
   console.log(`☁️   Cloudinary folder → pawconnect/pets\n`);
 });
+

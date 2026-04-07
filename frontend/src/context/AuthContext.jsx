@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authService } from '../services/authService.js';
+import authService from "../services/authService";
 
 const AuthContext = createContext();
 
@@ -15,22 +15,43 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // ✅ FIXED: Proper async user fetch
   useEffect(() => {
-    const user = authService.getCurrentUser();
-    if (user) {
-      setCurrentUser(user);
-    }
-    setLoading(false);
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          setLoading(false);
+          return;
+        }
+
+        const res = await authService.getMe();
+
+        if (res.success) {
+          setCurrentUser(res.user);
+        }
+      } catch (error) {
+        console.error("Auth error:", error);
+        localStorage.removeItem("token");
+        setCurrentUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
   }, []);
 
   const login = async (credentials) => {
     try {
       const result = await authService.login(credentials);
+
       if (result.success) {
         setCurrentUser(result.user);
-        // Dispatch custom event for other components
         window.dispatchEvent(new CustomEvent('login', { detail: result.user }));
       }
+
       return result;
     } catch (error) {
       throw error;
@@ -40,10 +61,12 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const result = await authService.register(userData);
+
       if (result.success) {
         setCurrentUser(result.user);
         window.dispatchEvent(new CustomEvent('login', { detail: result.user }));
       }
+
       return result;
     } catch (error) {
       throw error;
@@ -51,7 +74,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    await authService.logout();
+    authService.logout();
     setCurrentUser(null);
     window.dispatchEvent(new CustomEvent('logout'));
   };

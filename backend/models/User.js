@@ -14,6 +14,14 @@ const userSchema = mongoose.Schema({
     lowercase: true,
     trim: true,
   },
+  phone: {
+    type: String,
+    trim: true,
+  },
+  city: {
+    type: String,
+    trim: true,
+  },
   googleId: {
     type: String,
     sparse: true
@@ -25,19 +33,18 @@ const userSchema = mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['user', 'volunteer', 'ngo', 'admin'],
-    default: 'user',
+    enum: ['owner', 'ngo', 'volunteer', 'admin'],
+    default: 'owner',
   },
 }, {
   timestamps: true,
 });
 
 // Encrypt password before save
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password') || !this.password) return next();
+userSchema.pre('save', async function() {
+  if (!this.isModified('password') || !this.password) return;
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
-  next();
 });
 
 // Match password

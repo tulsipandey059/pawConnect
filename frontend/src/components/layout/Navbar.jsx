@@ -36,6 +36,11 @@ const Navbar = () => {
             <Link to="/browse" className="text-text-dark hover:text-primary-orange transition-colors duration-300 font-medium">
               Browse Pets
             </Link>
+            {isAuthenticated && (
+              <Link to="/dashboard" className="text-text-dark hover:text-primary-orange transition-colors duration-300 font-bold border-b-2 border-transparent hover:border-primary-orange pb-1">
+                Dashboard
+              </Link>
+            )}
             <Link to="/lost-pets" className="text-text-dark hover:text-primary-orange transition-colors duration-300 font-medium">
               Lost Pets
             </Link>
@@ -48,7 +53,12 @@ const Navbar = () => {
             <Link to="/map" className="text-text-dark hover:text-primary-orange transition-colors duration-300 font-medium">
               Map
             </Link>
-            {/* AI Tools Dropdown */}
+              {isAuthenticated && (
+                <Link to="/profile" className="text-text-dark hover:text-primary-orange transition-colors duration-300 font-medium px-4 py-3 block border-l-4 border-transparent hover:border-primary-orange" onClick={() => setIsOpen(false)}>
+                  Profile
+                </Link>
+              )}
+              {/* AI Tools Dropdown */}
             <div className="relative">
               <button 
                 onClick={() => setShowAITools(!showAITools)}
@@ -130,6 +140,11 @@ const Navbar = () => {
               <Link to="/browse" className="text-text-dark hover:text-primary-orange transition-colors duration-300 font-medium px-4 py-3 block border-l-4 border-transparent hover:border-primary-orange" onClick={() => setIsOpen(false)}>
                 Browse Pets
               </Link>
+              {isAuthenticated && (
+                <Link to="/dashboard" className="text-text-dark hover:text-primary-orange transition-colors duration-300 font-semibold px-4 py-3 block border-l-4 border-primary-orange bg-primary-orange/5" onClick={() => setIsOpen(false)}>
+                  📊 Dashboard
+                </Link>
+              )}
               <Link to="/lost-pets" className="text-text-dark hover:text-primary-orange transition-colors duration-300 font-medium px-4 py-3 block border-l-4 border-transparent hover:border-primary-orange" onClick={() => setIsOpen(false)}>
                 Lost Pets
               </Link>

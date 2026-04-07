@@ -11,23 +11,44 @@ const DesktopSidebar = () => {
     navigate('/');
   };
 
-  const baseNavItems = [
-    { to: '/dashboard', label: 'Dashboard', icon: '📊' },
-    { to: '/pets', label: 'My Pets', icon: '🐾' },
-    { to: '/reports/lost', label: 'Lost Reports', icon: '🐕' },
-    { to: '/adoption', label: 'Adoption Applications', icon: '❤️' },
-    { to: '/notifications', label: 'Notifications', icon: '🔔' },
-    { to: '/profile', label: 'Profile', icon: '👤' },
-    { to: '/map', label: 'Map', icon: '🗺️' },
-  ];
+  const getRoleNavItems = (role) => {
+    const common = [
+      { to: '/dashboard', label: 'Dashboard', icon: '📊' },
+      { to: '/notifications', label: 'Notifications', icon: '🔔' },
+      { to: '/profile', label: 'Profile', icon: '👤' },
+    ];
 
-  const ngoNavItems = [
-    { to: '/dashboard/ngo/adoptions', label: 'Adoption Management', icon: '🏢' },
-    { to: '/rescue/requests', label: 'Rescue Requests', icon: '🚨' },
-    { to: '/volunteers', label: 'Volunteers', icon: '🤝' },
-  ];
+    switch (role) {
+      case 'owner':
+        return [
+          ...common,
+          { to: '/pets', label: 'My Pets', icon: '🐾' },
+          { to: '/report-lost', label: 'Report Lost Pet', icon: '🐕‍🦺' },
+          { to: '/report-found', label: 'Report Found Pet', icon: '🐈' },
+          { to: '/ai-matches', label: 'AI Matches', icon: '🤖' },
+        ];
+      case 'ngo':
+        return [
+          ...common,
+          { to: '/dashboard/nearby-lost', label: 'Nearby Lost Pets', icon: '🐕' },
+          { to: '/rescue-requests', label: 'Rescue Requests', icon: '🚨' },
+          { to: '/adoption-requests', label: 'Adoption Requests', icon: '❤️' },
+          { to: '/case-management', label: 'Case Management', icon: '📋' },
+        ];
+      case 'volunteer':
+        return [
+          ...common,
+          { to: '/nearby-alerts', label: 'Nearby Alerts', icon: '🔔' },
+          { to: '/accept-help', label: 'Accept Help Requests', icon: '👍' },
+          { to: '/assigned-tasks', label: 'Assigned Tasks', icon: '✅' },
+          { to: '/map', label: 'Map', icon: '🗺️' },
+        ];
+      default:
+        return common;
+    }
+  };
 
-  const navItems = [...baseNavItems, ...(currentUser?.role === 'ngo' ? ngoNavItems : [])];
+  const navItems = getRoleNavItems(currentUser?.role);
 
   return (
     <div className="h-full w-full bg-white border-r border-gray-200 flex flex-col">

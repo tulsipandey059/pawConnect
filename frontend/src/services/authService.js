@@ -1,51 +1,44 @@
-// Mock Auth Service - LocalStorage based simulation
-// No backend dependency
+import apiClient from "./api";
 
-import api from './api.js';
-
-export const authService = {
-  login: async (credentials) => {
-    const result = await api.post('/auth/login', credentials);
-    if (result.token) {
-      localStorage.setItem('token', result.token);
-      localStorage.setItem('currentUser', JSON.stringify(result.user));
-    }
-    return result;
-  },
-
+// AUTH SERVICE
+const authService = {
+  // REGISTER
   register: async (userData) => {
-    const result = await api.post('/auth/register', userData);
-    if (result.token) {
-      localStorage.setItem('token', result.token);
-      localStorage.setItem('currentUser', JSON.stringify(result.user));
+    const response = await apiClient.post("/auth/register", userData);
+    return response;
+  },
+
+  // LOGIN
+  login: async (userData) => {
+    const response = await apiClient.post("/auth/login", userData);
+
+    // ✅ store token if backend sends it
+    if (response.token) {
+      localStorage.setItem("token", response.token);
     }
-    return result;
+
+    return response;
   },
 
+  // LOGOUT
   logout: () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('currentUser');
-    return { success: true };
+    localStorage.removeItem("token");
   },
 
-  getCurrentUser: () => {
-    const user = localStorage.getItem('currentUser');
-    return user ? JSON.parse(user) : null;
-  },
-
+  // GET CURRENT USER
   getMe: async () => {
-    const token = localStorage.getItem('token');
-    if (!token) return null;
-    const response = await fetch('http://localhost:5000/api/auth/me', {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch("http://localhost:5000/api/auth/me", {
       headers: {
-        'Authorization': `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
-    if (!response.ok) return null;
-    const data = await response.json();
-    localStorage.setItem('currentUser', JSON.stringify(data.user));
-    return data.user;
-  }
+
+    if (!response.ok) throw new Error("Failed to fetch user");
+
+    return response.json();
+  },
 };
 
 export default authService;
