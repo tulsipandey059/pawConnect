@@ -6,6 +6,7 @@ import HomePage from './pages/home/HomePage';
 import BrowsePetsPage from './pages/pets/BrowsePetsPage';
 import PetDetailsPage from './pages/pets/PetDetailsPage';
 import LostPetsPage from './pages/pets/LostPetsPage';
+import MyPetsPage from './pages/pets/MyPetsPage';
 import AddPetPage from './pages/pets/AddPetPage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
@@ -61,6 +62,11 @@ function App() {
                 <Route path="/report-lost" element={<ReportLostPetPage />} />
                 <Route path="/report-found" element={<ReportFoundPetPage />} />
                 <Route path="/pets" element={<BrowsePetsPage />} />
+                <Route path="/my-pets" element={
+                  <ProtectedRoute>
+                    <MyPetsPage />
+                  </ProtectedRoute>
+                } />
                 <Route path="/lost-pets" element={<LostPetsPage />} />
                 <Route path="/pets/:id" element={<PetDetailsPage />} />
                 <Route path="/adoption/apply" element={<AdoptionFormPage />} />

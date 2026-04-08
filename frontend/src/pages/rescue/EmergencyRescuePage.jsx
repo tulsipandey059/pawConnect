@@ -1,11 +1,12 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import MapComponent from '../../components/maps/MapComponent';
 import Button from '../../components/ui/Button';
 import { mockRescueRequests } from '../../utils/mockData';
-import Loader from '../../components/ui/Loader';
 
 const EmergencyRescuePage = () => {
   const [loading, setLoading] = React.useState(false);
+  const navigate = useNavigate();
 
   const handleEmergencyCall = () => {
     setLoading(true);
@@ -13,6 +14,14 @@ const EmergencyRescuePage = () => {
       setLoading(false);
       alert('Emergency services notified! Help is on the way.');
     }, 2000);
+  };
+
+  const handleHelpNow = (requestTitle) => {
+    setLoading(true);
+    window.setTimeout(() => {
+      setLoading(false);
+      alert(`Rescue team assigned for ${requestTitle}.`);
+    }, 1200);
   };
 
   return (
@@ -26,13 +35,13 @@ const EmergencyRescuePage = () => {
             Found an injured animal or need immediate help? We're here 24/7.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
-            <Button variant="primary" size="lg" className="flex items-center justify-center space-x-3">
+            <Button variant="primary" size="lg" className="flex items-center justify-center space-x-3" onClick={handleEmergencyCall}>
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
               </svg>
               Call Emergency
             </Button>
-            <Button variant="outline" size="lg">
+            <Button variant="outline" size="lg" onClick={() => navigate('/report-found')}>
               Report Injury
             </Button>
           </div>
@@ -57,7 +66,12 @@ const EmergencyRescuePage = () => {
                       </span>
                     </div>
                     <p className="text-sm text-text-dark/70">{req.location}</p>
-                    <Button variant="primary" size="sm" className="mt-3 w-full">
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      className="mt-3 w-full"
+                      onClick={() => handleHelpNow(req.title)}
+                    >
                       Help Now
                     </Button>
                   </div>

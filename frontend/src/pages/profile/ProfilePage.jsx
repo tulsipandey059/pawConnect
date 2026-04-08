@@ -20,8 +20,18 @@ const ProfilePage = () => {
     { id: 3, petName: 'Bella', status: 'Lost', date: '2024-01-13' },
   ];
 
-  // Filter user's pets (mock ownerId 2 for petOwner)
-  const myPets = pets.filter(p => p.ownerId === (currentUser?.id || 2));
+  const ownerId = currentUser?.id ?? currentUser?._id;
+  const myPets = pets.filter((pet) => {
+    if (ownerId && pet.ownerId?.toString() === ownerId.toString()) {
+      return true;
+    }
+
+    if (currentUser?.email && pet.ownerEmail === currentUser.email) {
+      return true;
+    }
+
+    return false;
+  });
 
   useEffect(() => {
     if (currentUser) {
@@ -60,7 +70,7 @@ const ProfilePage = () => {
                 <h1 className="text-lg font-semibold text-text-dark mt-3">{currentUser.name}</h1>
                 <p className="text-sm text-gray-500">{currentUser.email}</p>
                 <span className="inline-block text-xs bg-blue-100 text-blue-600 px-3 py-1 rounded-full mx-auto mt-2">
-                  {currentUser.role === 'petOwner' ? 'Pet Owner' : currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1)}
+                  {currentUser.role === 'owner' ? 'Pet Owner' : currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1)}
                 </span>
                 <button
                   onClick={() => setEditMode(!editMode)}

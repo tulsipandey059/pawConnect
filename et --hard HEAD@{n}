@@ -1,0 +1,19 @@
+[33m82c6429[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m HEAD@{0}: reset: moving to ORIG_HEAD
+[33m82c6429[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m HEAD@{1}: reset: moving to HEAD
+[33m82c6429[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m HEAD@{2}: filter-branch: rewrite
+[33m7c55df7[m HEAD@{3}: commit: updated ui
+[33m8f8a363[m HEAD@{4}: reset: moving to HEAD~1
+[33mbf05442[m HEAD@{5}: commit: updated frontend ui
+[33m8f8a363[m HEAD@{6}: commit: updated ui
+[33mf7b9c20[m[33m ([m[1;31morigin/main[m[33m)[m HEAD@{7}: reset: moving to HEAD~1
+[33me9e8207[m HEAD@{8}: commit: updated frontend ui
+[33mf7b9c20[m[33m ([m[1;31morigin/main[m[33m)[m HEAD@{9}: commit: initialized backend part
+[33m7679cd8[m HEAD@{10}: commit: made few changes in auth pages
+[33m851125b[m HEAD@{11}: commit: updated UI fixed bugs and structure
+[33m0317046[m[33m ([m[1;31morigin/blackboxai/fix-pet-pages-rendering[m[33m)[m HEAD@{12}: merge blackboxai/fix-pet-pages-rendering: Fast-forward
+[33mf7e9912[m HEAD@{13}: checkout: moving from blackboxai/fix-pet-pages-rendering to main
+[33m0317046[m[33m ([m[1;31morigin/blackboxai/fix-pet-pages-rendering[m[33m)[m HEAD@{14}: commit: updated frontend UI and added adoption features
+[33md365b1e[m HEAD@{15}: commit: fix: resolve pet pages white screen and no results
+[33mf7e9912[m HEAD@{16}: checkout: moving from main to blackboxai/fix-pet-pages-rendering
+[33mf7e9912[m HEAD@{17}: Branch: renamed refs/heads/master to refs/heads/main
+[33mf7e9912[m HEAD@{19}: commit (initial): pawConnect Frontend

@@ -1,9 +1,14 @@
 import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Link } from 'react-router-dom';
+import { useNotifications } from '../../context/NotificationContext';
 
 const Topbar = ({ sidebarOpen, setSidebarOpen }) => {
   const { currentUser, logout } = useAuth();
+  const { unreadCount } = useNotifications();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const hideDashboardActions = location.pathname === '/dashboard';
 
   if (!currentUser) return null;
 
@@ -33,18 +38,27 @@ const Topbar = ({ sidebarOpen, setSidebarOpen }) => {
 
           {/* Right side: Notifications & User */}
           <div className="flex items-center space-x-4">
+            {hideDashboardActions ? null : (
+              <>
             {/* Notifications */}
-            <button className="relative p-2 text-text-dark hover:bg-gray-100 rounded-xl transition-colors">
+            <button
+              className="relative p-2 text-text-dark hover:bg-gray-100 rounded-xl transition-colors"
+              onClick={() => navigate('/notifications')}
+            >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               </svg>
               <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
-                3
+                {unreadCount}
               </span>
             </button>
 
             {/* User Profile */}
-            <div className="flex items-center space-x-3 p-2 hover:bg-gray-100 rounded-xl transition-colors group cursor-pointer">
+            <button
+              type="button"
+              className="flex items-center space-x-3 p-2 hover:bg-gray-100 rounded-xl transition-colors group cursor-pointer"
+              onClick={() => navigate('/profile')}
+            >
               <div className="w-10 h-10 bg-gradient-to-br from-primary-orange to-orange-500 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
                 {currentUser.name?.charAt(0)?.toUpperCase() || 'U'}
               </div>
@@ -57,11 +71,14 @@ const Topbar = ({ sidebarOpen, setSidebarOpen }) => {
               <svg className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
-            </div>
+            </button>
 
             {/* Logout Button */}
             <button
-              onClick={logout}
+              onClick={() => {
+                logout();
+                navigate('/');
+              }}
               className="hidden md:flex items-center space-x-2 bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-xl font-medium text-sm transition-all shadow-sm hover:shadow-md whitespace-nowrap"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,6 +86,8 @@ const Topbar = ({ sidebarOpen, setSidebarOpen }) => {
               </svg>
               <span>Logout</span>
             </button>
+              </>
+            )}
           </div>
         </div>
       </div>

@@ -5,6 +5,9 @@ const authService = {
   // REGISTER
   register: async (userData) => {
     const response = await apiClient.post("/auth/register", userData);
+    if (response.token) {
+      localStorage.setItem("token", response.token);
+    }
     return response;
   },
 

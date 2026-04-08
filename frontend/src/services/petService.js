@@ -16,10 +16,12 @@ export const petService = {
   },
 
   createPet: async (petData) => {
+    const petName = petData.name || petData.petName || `${petData.species || 'Pet'} report`;
     const newPet = { 
       id: Date.now(), 
       ...petData, 
-      image: petData.image ? URL.createObjectURL(petData.image) : 'https://via.placeholder.com/400x300?text=' + petData.name,
+      name: petName,
+      image: petData.image ? URL.createObjectURL(petData.image) : 'https://via.placeholder.com/400x300?text=' + encodeURIComponent(petName),
       createdAt: new Date().toISOString()
     };
     

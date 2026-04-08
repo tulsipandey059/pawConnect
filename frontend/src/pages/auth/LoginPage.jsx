@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import authService from '../../services/authService.js';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -43,10 +44,9 @@ const LoginPage = () => {
     
     if (validateForm()) {
       try {
-        const result = await authService.login(formData);
+        const result = await login(formData);
         if (result.success) {
-          window.dispatchEvent(new CustomEvent('login', { detail: result.user }));
-          navigate('/dashboard');
+          navigate('/', { replace: true });
         }
       } catch (err) {
         setErrors({ general: err.message || 'Invalid credentials' });

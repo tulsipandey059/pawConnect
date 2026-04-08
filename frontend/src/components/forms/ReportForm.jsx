@@ -1,7 +1,33 @@
-import React, { useState, useRef } from 'react';
-import MapComponent from '../maps/MapComponent';
+import React, { useMemo, useState } from 'react';
 import Button from '../ui/Button';
 import Loader from '../ui/Loader';
+
+const breedOptions = {
+  Dog: [
+    'Golden Retriever',
+    'Labrador',
+    'German Shepherd',
+    'Pug',
+    'Beagle',
+    'Indie',
+    'Shih Tzu',
+    'Husky',
+    'Rottweiler',
+    'Doberman',
+  ],
+  Cat: [
+    'Persian',
+    'Siamese',
+    'Maine Coon',
+    'British Shorthair',
+    'Ragdoll',
+    'Bengal',
+    'Domestic Shorthair',
+    'Scottish Fold',
+    'Sphynx',
+    'Indie Cat',
+  ],
+};
 
 const ReportForm = ({ type = 'lost', onSubmit, onImageUpload }) => {
   const [formData, setFormData] = useState({
@@ -9,193 +35,190 @@ const ReportForm = ({ type = 'lost', onSubmit, onImageUpload }) => {
     species: 'Dog',
     breed: '',
     age: '',
-    color: '',
-    date: '',
     description: '',
     contactPhone: '',
-    contactEmail: '',
     image: null,
-    location: { lat: 19.0760, lng: 72.8777, address: '' }
+    location: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
-  const mapRef = useRef();
 
-  const handleLocationChange = (location) => {
-    setFormData(prev => ({ ...prev, location }));
+  const availableBreeds = useMemo(() => breedOptions[formData.species] || [], [formData.species]);
+
+  const handleFieldChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFormData(prev => ({ ...prev, image: file }));
-      setImagePreview(URL.createObjectURL(file));
-      if (onImageUpload) onImageUpload(file);
+  const handleSpeciesChange = (species) => {
+    setFormData((prev) => ({ ...prev, species, breed: '' }));
+  };
+
+  const handleImageChange = (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
     }
+
+    handleFieldChange('image', file);
+    setImagePreview(URL.createObjectURL(file));
+    onImageUpload?.(file);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setIsSubmitting(true);
+
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Mock API
-      onSubmit(formData);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await onSubmit(formData);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const title = type === 'lost' ? 'Report Lost Pet' : 'Report Found Pet';
-  const subtitle = type === 'lost' ? 'Help us find your furry friend' : 'Help reunite a lost pet with their owner';
+  const subtitle =
+    type === 'lost'
+      ? 'Share the details that will help others recognize your pet quickly.'
+      : 'Add clear details so the right owner can identify this pet fast.';
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-3xl mx-auto">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-text-dark mb-3">{title}</h1>
-        <p className="text-xl text-text-dark/70">{subtitle}</p>
+        <p className="text-lg text-text-dark/70">{subtitle}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Pet Basic Info */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white rounded-3xl shadow-soft p-6 md:p-8 space-y-6">
           <div>
-            <label className="block text-sm font-semibold text-text-dark mb-2">Pet Name *</label>
-            <input
-              type="text"
-              value={formData.petName}
-              onChange={(e) => setFormData({...formData, petName: e.target.value})}
-              className="w-full px-4 py-3 rounded-2xl border-2 border-light-accent focus:border-primary-orange focus:ring-2 focus:ring-primary-orange/20 outline-none transition-all"
-              placeholder="e.g. Buddy"
+            <label className="block text-sm font-semibold text-text-dark mb-2">Image *</label>
+            <label className="block border-2 border-dashed border-light-accent rounded-3xl p-6 cursor-pointer hover:border-primary-orange transition-colors">
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageChange}
+                required
+              />
+              {imagePreview ? (
+                <img src={imagePreview} alt="Pet preview" className="w-full h-64 object-cover rounded-2xl" />
+              ) : (
+                <div className="text-center text-text-dark/60">
+                  <p className="text-lg font-semibold text-text-dark">Upload a clear pet photo</p>
+                  <p className="mt-2">Tap to choose an image</p>
+                </div>
+              )}
+            </label>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-semibold text-text-dark mb-2">Pet Name</label>
+              <input
+                type="text"
+                value={formData.petName}
+                onChange={(event) => handleFieldChange('petName', event.target.value)}
+                className="w-full px-4 py-3 rounded-2xl border-2 border-light-accent focus:border-primary-orange focus:ring-2 focus:ring-primary-orange/20 outline-none transition-all"
+                placeholder="e.g. Buddy"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-text-dark mb-2">Location *</label>
+              <input
+                type="text"
+                value={formData.location}
+                onChange={(event) => handleFieldChange('location', event.target.value)}
+                className="w-full px-4 py-3 rounded-2xl border-2 border-light-accent focus:border-primary-orange focus:ring-2 focus:ring-primary-orange/20 outline-none transition-all"
+                placeholder="Area, street, landmark"
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-text-dark mb-3">Type *</label>
+            <div className="grid grid-cols-2 gap-3">
+              {['Dog', 'Cat'].map((species) => (
+                <button
+                  key={species}
+                  type="button"
+                  onClick={() => handleSpeciesChange(species)}
+                  className={`rounded-2xl border-2 px-4 py-3 font-semibold transition-all ${
+                    formData.species === species
+                      ? 'border-primary-orange bg-primary-orange text-white'
+                      : 'border-light-accent bg-white text-text-dark hover:border-primary-orange'
+                  }`}
+                >
+                  {species}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label className="block text-sm font-semibold text-text-dark mb-2">Breed *</label>
+              <select
+                value={formData.breed}
+                onChange={(event) => handleFieldChange('breed', event.target.value)}
+                className="w-full px-4 py-3 rounded-2xl border-2 border-light-accent focus:border-primary-orange focus:ring-2 focus:ring-primary-orange/20 outline-none transition-all"
+                required
+              >
+                <option value="">Select {formData.species.toLowerCase()} breed</option>
+                {availableBreeds.map((breed) => (
+                  <option key={breed} value={breed}>
+                    {breed}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-text-dark mb-2">Age *</label>
+              <input
+                type="text"
+                value={formData.age}
+                onChange={(event) => handleFieldChange('age', event.target.value)}
+                className="w-full px-4 py-3 rounded-2xl border-2 border-light-accent focus:border-primary-orange focus:ring-2 focus:ring-primary-orange/20 outline-none transition-all"
+                placeholder="e.g. 2 years"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-text-dark mb-2">Contact *</label>
+              <input
+                type="tel"
+                value={formData.contactPhone}
+                onChange={(event) => handleFieldChange('contactPhone', event.target.value)}
+                className="w-full px-4 py-3 rounded-2xl border-2 border-light-accent focus:border-primary-orange focus:ring-2 focus:ring-primary-orange/20 outline-none transition-all"
+                placeholder="+91 98765 43210"
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-text-dark mb-2">Describe *</label>
+            <textarea
+              rows="5"
+              value={formData.description}
+              onChange={(event) => handleFieldChange('description', event.target.value)}
+              className="w-full px-4 py-3 rounded-2xl border-2 border-light-accent focus:border-primary-orange focus:ring-2 focus:ring-primary-orange/20 outline-none transition-all resize-y"
+              placeholder="Special markings, collar, behavior, last known details..."
               required
             />
           </div>
-          <div>
-            <label className="block text-sm font-semibold text-text-dark mb-2">Species *</label>
-            <select
-              value={formData.species}
-              onChange={(e) => setFormData({...formData, species: e.target.value})}
-              className="w-full px-4 py-3 rounded-2xl border-2 border-light-accent focus:border-primary-orange focus:ring-2 focus:ring-primary-orange/20 outline-none transition-all"
-              required
-            >
-              <option value="Dog">Dog</option>
-              <option value="Cat">Cat</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-semibold text-text-dark mb-2">Breed</label>
-            <input
-              type="text"
-              value={formData.breed}
-              onChange={(e) => setFormData({...formData, breed: e.target.value})}
-              className="w-full px-4 py-3 rounded-2xl border-2 border-light-accent focus:border-primary-orange focus:ring-2 focus:ring-primary-orange/20 outline-none transition-all"
-              placeholder="e.g. Golden Retriever"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-text-dark mb-2">Age (approx)</label>
-            <input
-              type="text"
-              value={formData.age}
-              onChange={(e) => setFormData({...formData, age: e.target.value})}
-              className="w-full px-4 py-3 rounded-2xl border-2 border-light-accent focus:border-primary-orange focus:ring-2 focus:ring-primary-orange/20 outline-none transition-all"
-              placeholder="e.g. 2 years"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-semibold text-text-dark mb-2">Color/Markings</label>
-            <input
-              type="text"
-              value={formData.color}
-              onChange={(e) => setFormData({...formData, color: e.target.value})}
-              className="w-full px-4 py-3 rounded-2xl border-2 border-light-accent focus:border-primary-orange focus:ring-2 focus:ring-primary-orange/20 outline-none transition-all"
-              placeholder="e.g. Black & White, Brown spots"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-text-dark mb-2">Date Seen *</label>
-            <input
-              type="date"
-              value={formData.date}
-              onChange={(e) => setFormData({...formData, date: e.target.value})}
-              className="w-full px-4 py-3 rounded-2xl border-2 border-light-accent focus:border-primary-orange focus:ring-2 focus:ring-primary-orange/20 outline-none transition-all"
-              required
-            />
-          </div>
-        </div>
-
-        {/* Location - Map */}
-        <div>
-          <label className="block text-sm font-semibold text-text-dark mb-4">Last Seen Location *</label>
-          <div className="relative">
-            <MapComponent 
-              ref={mapRef}
-              height="300px" 
-              onLocationSelect={handleLocationChange}
-              defaultCenter={formData.location}
-            />
-            <p className="text-sm text-text-dark/60 mt-2">{formData.location.address || 'Click map to set location'}</p>
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-text-dark mb-2">Date/Time *</label>
-          <input
-            type="datetime-local"
-            value={formData.date}
-            onChange={(e) => setFormData({...formData, date: e.target.value})}
-            className="w-full px-4 py-3 rounded-2xl border-2 border-light-accent focus:border-primary-orange focus:ring-2 focus:ring-primary-orange/20 outline-none transition-all"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-text-dark mb-2">Description *</label>
-          <textarea
-            rows="5"
-            value={formData.description}
-            onChange={(e) => setFormData({...formData, description: e.target.value})}
-            className="w-full px-4 py-3 rounded-2xl border-2 border-light-accent focus:border-primary-orange focus:ring-2 focus:ring-primary-orange/20 outline-none transition-all resize-vertical"
-            placeholder="Distinctive features, collar color, behavior, direction seen..."
-            required
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-semibold text-text-dark mb-2">Contact Phone *</label>
-            <input
-              type="tel"
-              value={formData.contactPhone}
-              onChange={(e) => setFormData({...formData, contactPhone: e.target.value})}
-              className="w-full px-4 py-3 rounded-2xl border-2 border-light-accent focus:border-primary-orange focus:ring-2 focus:ring-primary-orange/20 outline-none transition-all"
-              placeholder="+91 98765 43210"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-text-dark mb-2">Email</label>
-            <input
-              type="email"
-              value={formData.contactEmail}
-              onChange={(e) => setFormData({...formData, contactEmail: e.target.value})}
-              className="w-full px-4 py-3 rounded-2xl border-2 border-light-accent focus:border-primary-orange focus:ring-2 focus:ring-primary-orange/20 outline-none transition-all"
-              placeholder="you@example.com"
-            />
-          </div>
-        </div>
-
-        <div className="text-center pt-4">
-          <Button 
-            type="submit" 
-            variant="primary" 
-            size="lg" 
+        <div className="text-center pt-2">
+          <Button
+            type="submit"
+            variant="primary"
+            size="lg"
             className="w-full max-w-md mx-auto"
             disabled={isSubmitting}
           >
@@ -215,4 +238,3 @@ const ReportForm = ({ type = 'lost', onSubmit, onImageUpload }) => {
 };
 
 export default ReportForm;
-

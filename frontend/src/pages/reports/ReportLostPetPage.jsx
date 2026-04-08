@@ -6,6 +6,7 @@ import PetMatchCard from '../../components/pets/PetMatchCard';
 import PetGallery from '../../components/pets/PetGallery';
 import { aiService } from '../../services/aiService';
 import { usePets } from '../../context/PetContext';
+import { useAuth } from '../../context/AuthContext';
 
 const ReportLostPetPage = () => {
   const [step, setStep] = useState('form'); // 'form' | 'matching' | 'success'
@@ -13,17 +14,21 @@ const ReportLostPetPage = () => {
   const [isMatching, setIsMatching] = useState(false);
   const [uploadedImage, setUploadedImage] = useState(null);
   const { pets, addPet } = usePets();
+  const { currentUser } = useAuth();
   const lostPets = pets.filter(p => p.status === 'Lost').slice(0, 8);
 
   const handleFormSubmit = async (formData) => {
     // Add pet to context
-    const newPet = addPet({
+    await addPet({
       ...formData,
+      name: formData.petName || `${formData.species} report`,
       status: 'Lost',
       id: Date.now(),
       distance: '0 km',
-      tags: [formData.species],
+      tags: [formData.species, formData.breed],
       contact: formData.contactPhone,
+      ownerId: currentUser?.id ?? currentUser?._id,
+      ownerEmail: currentUser?.email,
       image: formData.image ? URL.createObjectURL(formData.image) : 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=400&h=300&fit=crop'
     });
 
@@ -142,7 +147,7 @@ const ReportLostPetPage = () => {
           </p>
           <div className="space-y-4">
             <Link
-              to="/pets"
+              to="/my-pets"
               className="block w-full bg-primary-orange text-white py-4 rounded-2xl font-bold text-lg hover:bg-orange-400 transition-all shadow-lg hover:shadow-xl"
             >
               View My Report

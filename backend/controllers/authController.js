@@ -38,7 +38,7 @@ exports.register = asyncHandler(async (req, res) => {
   // Check existing user
   const existingUser = await User.findOne({ email: email.trim().toLowerCase() });
   if (existingUser) {
-    const error = new Error("User already exists with this email");
+    const error = new Error("Account already exists for this email. Please login or use different email.");
     error.statusCode = 409;
     throw error;
   }
