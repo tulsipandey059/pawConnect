@@ -18,7 +18,7 @@ import MapPage from './pages/map/MapPage';
 import AdoptionPage from './pages/adoption/AdoptionPage';
 import AdoptionFormPage from './pages/adoption/AdoptionFormPage';
 import AboutPage from './pages/info/AboutPage';
-import DiseasePredictionPage from './pages/ai/DiseasePredictionPage';
+import AIPetHealthPage from './pages/ai/AIPetHealthPage';
 import BreedDetectionPage from './pages/ai/BreedDetectionPage';
 import NotificationsPage from './pages/notifications/NotificationsPage';
 import ProfilePage from './pages/profile/ProfilePage';
@@ -73,10 +73,10 @@ function App() {
                 <Route path="/map" element={<MapPage />} />
                 <Route path="/report-sighting/:petId" element={<ReportLostPetPage />} />
                 <Route path="/about" element={<AboutPage />} />
-                <Route path="/health" element={<DiseasePredictionPage />} />
+                <Route path="/health" element={<AIPetHealthPage />} />
                 <Route path="/breed-detect" element={<BreedDetectionPage />} />
                 <Route path="/adoption" element={<AdoptionPage />} />
-                <Route path="/ai/disease" element={<DiseasePredictionPage />} />
+                <Route path="/ai/disease" element={<AIPetHealthPage />} />
                 <Route path="/ai/breed" element={<BreedDetectionPage />} />
                 <Route path="/ai/chat" element={<AIChatPage />} />
                 <Route path="/rescue" element={<EmergencyRescuePage />} />

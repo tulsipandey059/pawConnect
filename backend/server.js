@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors    = require("cors");
 const morgan  = require("morgan");
+const path    = require("path");
 
 const connectDB    = require("./config/db");
 const errorHandler = require("./middleware/errorHandler");
@@ -11,6 +12,7 @@ const authRoutes     = require("./routes/authRoutes");
 const petRoutes      = require("./routes/petRoutes");
 const emergencyRoutes  = require("./routes/emergencyRoutes");
 const adoptionRoutes   = require("./routes/adoptionRoutes");
+const petHealthRoutes  = require("./routes/petHealthRoutes");
 
 // Connect to MongoDB
 connectDB();
@@ -30,6 +32,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Session for passport
 const session = require('express-session');
@@ -73,6 +76,7 @@ app.use("/api/auth",              authRoutes);
 app.use("/api/pets",              petRoutes);
 app.use("/api/emergencies",       emergencyRoutes);
 app.use("/api/adoption-requests", adoptionRoutes);
+app.use("/api/pet-health",        petHealthRoutes);
 
 // ─── 404 Handler ─────────────────────────────────────────────────────────────
 app.use((req, res) => {
