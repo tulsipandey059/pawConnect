@@ -9,7 +9,7 @@ const HeroSection = () => {
       <div className="absolute bottom-20 right-10 w-96 h-96 bg-primary-orange/20 rounded-full blur-3xl"></div>
       <div className="absolute top-40 right-1/4 w-48 h-48 bg-light-accent/20 rounded-full blur-2xl"></div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+      <div className="max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
           <div className="relative z-10">
@@ -92,7 +92,7 @@ const HeroSection = () => {
 
       {/* Features Section */}
       <section className="bg-white/50 py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-text-dark mb-6">Why Choose PawConnect?</h2>
             <p className="text-xl text-text-dark/60 max-w-3xl mx-auto">

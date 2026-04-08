@@ -445,7 +445,7 @@ const Dashboard = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div ref={assignedTasksRef} id="assigned-tasks" className="bg-white rounded-3xl shadow-soft p-8">
+            <div className="bg-white rounded-3xl shadow-soft p-8">
               <h3 className="text-xl font-bold text-text-dark mb-6">Rescue Requests</h3>
               <div className="space-y-4">
                 {ngoRequests.slice(0, 2).map((request) => (
@@ -586,7 +586,7 @@ const Dashboard = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="bg-white rounded-3xl shadow-soft p-8">
+            <div ref={assignedTasksRef} id="assigned-tasks" className="bg-white rounded-3xl shadow-soft p-8">
               <h3 className="text-xl font-bold text-text-dark mb-6">Assigned Tasks ({volunteerTasks.length})</h3>
               <div className="space-y-4">
                 {volunteerTasks.map((task) => (

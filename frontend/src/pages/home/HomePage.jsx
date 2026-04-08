@@ -65,7 +65,7 @@ const HomePage = () => {
 
       {/* Search Section */}
       <section className="py-20 bg-white/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-text-dark mb-4">Find Pets Near You</h2>
             <p className="text-xl text-text-dark/60 max-w-2xl mx-auto">
@@ -117,7 +117,7 @@ const HomePage = () => {
 
       {/* How It Works */}
       <section className="py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
             <h2 className="text-4xl font-bold text-text-dark mb-6">How PawConnect Works</h2>
             <p className="text-xl text-text-dark/60 max-w-3xl mx-auto">
@@ -142,7 +142,7 @@ const HomePage = () => {
 
       {/* Featured Pets */}
       <section className="py-24 bg-white/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-text-dark mb-6">Featured Pets</h2>
             <p className="text-xl text-text-dark/60">
@@ -160,7 +160,7 @@ const HomePage = () => {
 
       {/* Adoption Highlight */}
       <section className="py-24 bg-gradient-to-r from-primary-orange/10 to-light-accent/50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="text-5xl mb-8">🐾 ❤️</div>
           <h2 className="text-4xl font-bold text-text-dark mb-8">Why Adopt from PawConnect?</h2>
           <div className="grid md:grid-cols-2 gap-12 mb-12">
@@ -192,7 +192,7 @@ const HomePage = () => {
 
       {/* Testimonials */}
       <section className="py-24">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[92rem] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
             <h2 className="text-4xl font-bold text-text-dark mb-6">Happy Reunions & Adoptions</h2>
             <p className="text-xl text-text-dark/60">
