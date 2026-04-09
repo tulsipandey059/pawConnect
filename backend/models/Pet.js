@@ -30,6 +30,10 @@ const petSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    contact: {
+      type: String,
+      trim: true,
+    },
     description: {
       type: String,
       required: [true, "Description is required"],
@@ -74,7 +78,7 @@ const petSchema = new mongoose.Schema(
     postedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      required: false,
     },
   },
   { timestamps: true }

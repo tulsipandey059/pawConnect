@@ -14,7 +14,7 @@ const {
   getMyPets,
 } = require("../controllers/petController");
 
-const { protect }        = require("../middleware/auth");
+const { protect, attachUserIfPresent } = require("../middleware/auth");
 const validate           = require("../middleware/validate");
 const uploadMiddleware    = require("../middleware/upload");
 
@@ -46,7 +46,7 @@ router.get("/user/my-posts", protect, getMyPets);
 // POST /api/pets/add-pet — canonical alias requested in brief
 router.post(
   "/",
-  protect,
+  attachUserIfPresent,
   uploadMiddleware,   // ← multer uploads files to Cloudinary BEFORE controller runs
   petRules,
   validate,
@@ -55,7 +55,7 @@ router.post(
 
 router.post(
   "/add-pet",
-  protect,
+  attachUserIfPresent,
   uploadMiddleware,
   petRules,
   validate,

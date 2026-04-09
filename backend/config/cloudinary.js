@@ -1,4 +1,4 @@
-const cloudinary = require("cloudinary").v2;
+const cloudinary = require("cloudinary");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const multer = require("multer");
 
@@ -58,7 +58,7 @@ const deleteFromCloudinary = async (imageUrl) => {
     const folder = parts[parts.length - 2];
     const publicId = `${folder}/${filename}`;
 
-    const result = await cloudinary.uploader.destroy(publicId);
+    const result = await cloudinary.v2.uploader.destroy(publicId);
     return result;
   } catch (err) {
     console.error("Cloudinary delete error:", err.message);

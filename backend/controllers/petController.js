@@ -151,24 +151,36 @@ exports.getPet = asyncHandler(async (req, res) => {
 //   - All other pet fields as text fields in the same form
 // ─────────────────────────────────────────────────────────────────────────────
 exports.createPet = asyncHandler(async (req, res) => {
+  if (req.body.status === "adoption" && !req.user) {
+    return res.status(401).json({
+      success: false,
+      message: "Please log in before creating an adoption listing.",
+    });
+  }
+
   // Build the images array from whatever multer uploaded to Cloudinary.
   // If no files were attached the pet is saved with an empty images array.
   const images = formatUploadedImages(req.files);
 
-  const pet = await Pet.create({
+  const petPayload = {
     ...req.body,
     images,
-    postedBy: req.user._id,
     // Nested location object: multer sends "location[city]" as flat keys,
     // so we normalise them here if needed.
     location:
       req.body.location ||
-      {
-        address: req.body["location[address]"],
-        city:    req.body["location[city]"],
-        state:   req.body["location[state]"],
-      },
-  });
+        {
+          address: req.body["location[address]"],
+          city:    req.body["location[city]"],
+          state:   req.body["location[state]"],
+        },
+  };
+
+  if (req.user?._id) {
+    petPayload.postedBy = req.user._id;
+  }
+
+  const pet = await Pet.create(petPayload);
 
   let embeddingWarning = null;
   const primaryImageUrl = getPrimaryImageUrl(pet);

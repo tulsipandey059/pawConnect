@@ -1,7 +1,8 @@
 import axios from "axios";
+import { API_BASE } from "./api";
 
 const API = axios.create({
-  baseURL: "http://localhost:5000/api/pet-health",
+  baseURL: `${API_BASE}/pet-health`,
 });
 
 export const checkPetHealth = async (formData) => {

@@ -11,6 +11,7 @@ const BrowsePetsPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   const filteredPets = pets.filter((pet) => {
+    const normalizedStatus = pet.status?.toLowerCase();
     const matchesSearch = pet.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       pet.breed.toLowerCase().includes(searchTerm.toLowerCase()) ||
       pet.location.toLowerCase().includes(searchTerm.toLowerCase());
@@ -21,9 +22,9 @@ const BrowsePetsPage = () => {
     } else if (selectedCategory === 'cat') {
       matchesCategory = pet.tags.includes('Cat');
     } else if (selectedCategory === 'lost') {
-      matchesCategory = pet.status === 'Lost';
+      matchesCategory = normalizedStatus === 'lost';
     } else if (selectedCategory === 'adoption') {
-      matchesCategory = pet.status === 'Adoption';
+      matchesCategory = normalizedStatus === 'adoption';
     }
 
     return matchesSearch && matchesCategory;
@@ -84,7 +85,7 @@ const BrowsePetsPage = () => {
             {filteredPets.map((pet) => (
               <div key={pet.id} className="group relative">
                 <PetCard pet={pet} />
-                {pet.status === 'Lost' && (
+                {pet.status?.toLowerCase() === 'lost' && (
                   <Link
                     to={`/report-sighting/${pet.id}`}
                     className="absolute inset-0 bg-black/20 hover:bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-sm rounded-3xl"

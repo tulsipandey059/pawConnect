@@ -13,46 +13,54 @@ const ReportLostPetPage = () => {
   const [matches, setMatches] = useState([]);
   const [isMatching, setIsMatching] = useState(false);
   const [uploadedImage, setUploadedImage] = useState(null);
+  const [submitError, setSubmitError] = useState('');
   const { pets, addPet } = usePets();
   const { currentUser } = useAuth();
-  const lostPets = pets.filter(p => p.status === 'Lost').slice(0, 8);
+  const lostPets = pets.filter((p) => p.status?.toLowerCase() === 'lost').slice(0, 8);
 
   const handleFormSubmit = async (formData) => {
-    // Add pet to context
-    await addPet({
-      ...formData,
-      name: formData.petName || `${formData.species} report`,
-      status: 'Lost',
-      id: Date.now(),
-      distance: '0 km',
-      tags: [formData.species, formData.breed],
-      contact: formData.contactPhone,
-      ownerId: currentUser?.id ?? currentUser?._id,
-      ownerEmail: currentUser?.email,
-      image: formData.image ? URL.createObjectURL(formData.image) : 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=400&h=300&fit=crop'
-    });
+    setSubmitError('');
 
-    if (formData.image && step === 'form') {
-      setIsMatching(true);
-      try {
-        const result = await aiService.checkSimilarPets(formData.image, 'lost', {
-          location: formData.location,
-          type: formData.species,
-          breed: formData.breed,
-        });
-        if (result.success) {
-          setMatches(result.matches);
-          setUploadedImage(formData.image);
-          setStep('matching');
+    try {
+      await addPet({
+        ...formData,
+        name: formData.petName || `${formData.species} report`,
+        status: 'lost',
+        distance: '0 km',
+        tags: [formData.species, formData.breed],
+        contact: formData.contactPhone,
+        ownerId: currentUser?.id ?? currentUser?._id,
+        ownerEmail: currentUser?.email,
+      });
+
+      if (formData.image && step === 'form') {
+        setIsMatching(true);
+        try {
+          const result = await aiService.checkSimilarPets(formData.image, 'lost', {
+            location: formData.location,
+            type: formData.species.toLowerCase(),
+            breed: formData.breed,
+          });
+          if (result.success) {
+            setMatches(result.matches);
+            setUploadedImage(formData.image);
+            setStep('matching');
+          }
+        } catch (error) {
+          console.error('AI matching failed:', error);
+          setStep('success');
+        } finally {
+          setIsMatching(false);
         }
-      } catch (error) {
-        console.error('AI matching failed:', error);
+      } else {
         setStep('success');
-      } finally {
-        setIsMatching(false);
       }
-    } else {
-      setStep('success');
+    } catch (error) {
+      console.error('Pet report failed:', error);
+      setSubmitError(
+        error.message || 'Could not submit the lost pet report. Please try again.'
+      );
+      setIsMatching(false);
     }
   };
 
@@ -186,6 +194,12 @@ const ReportLostPetPage = () => {
             Help us find your furry family member. Our AI and community will work together.
           </p>
         </div>
+
+        {submitError ? (
+          <div className="mb-8 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-red-700">
+            {submitError}
+          </div>
+        ) : null}
 
         <ReportForm 
           type="lost"

@@ -49,7 +49,10 @@ export const PetProvider = ({ children }) => {
   };
 
   const getPetById = (id) => {
-    return pets.find(pet => pet.id === parseInt(id) || pet.id == id);
+    return pets.find(
+      (pet) =>
+        String(pet.id) === String(id) || String(pet._id || '') === String(id)
+    );
   };
 
   const value = {

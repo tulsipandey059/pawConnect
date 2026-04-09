@@ -38,7 +38,7 @@ router.get("/google/callback",
   googleCallback
 );
 
-router.post("/register", validate, register); 
+router.post("/register", registerRules, validate, register); 
 router.post("/login", loginRules, validate, login);
 router.get("/me", protect, getMe);
 router.put("/me", protect, updateProfile);

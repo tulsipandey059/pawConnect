@@ -1,46 +1,70 @@
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+export const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-const apiClient = {
-  get: async (endpoint) => {
-    const response = await fetch(`${API_BASE}${endpoint}`);
-    if (!response.ok) throw new Error(`API Error: ${response.status}`);
-    return response.json();
-  },
+const buildHeaders = (headers = {}, auth = false) => {
+  const nextHeaders = { ...headers };
 
-  post: async (endpoint, data) => {
-  const response = await fetch(`${API_BASE}${endpoint}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
-
-  if (!response.ok) {
-    let errorResponse;
-    try {
-      errorResponse = await response.json();
-    } catch (parseErr) {
-      // Backend returned non-JSON (HTML error page, plain text, etc.)
-      errorResponse = { message: `Server error ${response.status}: ${response.statusText}` };
+  if (auth) {
+    const token = localStorage.getItem('token');
+    if (token) {
+      nextHeaders.Authorization = `Bearer ${token}`;
     }
-    throw new Error(errorResponse?.message || errorResponse?.error || `Server error ${response.status}`);
   }
 
-  return response.json();
-},
+  return nextHeaders;
+};
 
-  put: async (endpoint, data) => {
-    const response = await fetch(`${API_BASE}${endpoint}`, {
+const parseJsonSafely = async (response) => {
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
+};
+
+const request = async (endpoint, options = {}) => {
+  const { auth = false, headers, ...fetchOptions } = options;
+  const response = await fetch(`${API_BASE}${endpoint}`, {
+    ...fetchOptions,
+    headers: buildHeaders(headers, auth),
+  });
+
+  const payload = await parseJsonSafely(response);
+
+  if (!response.ok) {
+    throw new Error(
+      payload?.message ||
+        payload?.error ||
+        `Server error ${response.status}: ${response.statusText}`
+    );
+  }
+
+  return payload;
+};
+
+const apiClient = {
+  get: (endpoint, options = {}) => request(endpoint, options),
+
+  post: (endpoint, data, options = {}) =>
+    request(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options.headers || {}),
+      },
+      body: JSON.stringify(data),
+      ...options,
+    }),
+
+  put: (endpoint, data, options = {}) =>
+    request(endpoint, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
+        ...(options.headers || {}),
       },
       body: JSON.stringify(data),
-    });
-    if (!response.ok) throw new Error(`API Error: ${response.status}`);
-    return response.json();
-  },
+      ...options,
+    }),
 };
 
 export default apiClient;

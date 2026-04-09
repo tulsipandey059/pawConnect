@@ -1,14 +1,8 @@
 const asyncHandler = require("../utils/asyncHandler");
 const User = require("../models/User");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+const generateToken = require("../utils/generateToken");
 
 // 🔑 Generate JWT
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET || "secret123", {
-    expiresIn: "7d",
-  });
-};
 
 // =========================
 // ✅ REGISTER USER

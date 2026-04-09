@@ -1,4 +1,4 @@
-import apiClient from "./api";
+import apiClient, { API_BASE } from "./api";
 
 // AUTH SERVICE
 const authService = {
@@ -32,10 +32,12 @@ const authService = {
   getMe: async () => {
     const token = localStorage.getItem("token");
 
-    const response = await fetch("http://localhost:5000/api/auth/me", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    const response = await fetch(`${API_BASE}/auth/me`, {
+      headers: token
+        ? {
+            Authorization: `Bearer ${token}`,
+          }
+        : {},
     });
 
     if (!response.ok) throw new Error("Failed to fetch user");
