@@ -65,8 +65,10 @@ app.get("/", (req, res) => {
       auth:             "/api/auth",
       pets:             "/api/pets",
       addPet:           "POST /api/pets/add-pet  (multipart/form-data)",
+      similaritySearch: "POST /api/pets/similarity-search",
       emergencies:      "/api/emergencies",
       adoptionRequests: "/api/adoption-requests",
+      petHealth:        "/api/pet-health",
     },
   });
 });

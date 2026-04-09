@@ -1,6 +1,10 @@
 const Pet = require("../models/Pet");
-const { deleteFromCloudinary } = require("../config/cloudinary");
+const { cloudinary, deleteFromCloudinary } = require("../config/cloudinary");
 const asyncHandler = require("../utils/asyncHandler");
+const {
+  getEmbedding,
+  searchEmbedding,
+} = require("../services/imageSimilarityService");
 
 // ─── Helper: parse uploaded files → [{url, publicId}] ────────────────────────
 // multer-storage-cloudinary attaches .path (secure URL) and .filename (public_id)
@@ -10,6 +14,81 @@ const formatUploadedImages = (files = []) =>
     url: f.path,        // secure Cloudinary URL  e.g. https://res.cloudinary.com/...
     publicId: f.filename, // Cloudinary public_id  e.g. pawconnect/pets/pet_17...
   }));
+
+const normalizeValue = (value) =>
+  typeof value === "string" ? value.trim().toLowerCase() : "";
+
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const buildSearchFilters = ({ location, type, breed, reportType }) => {
+  const filters = {
+    isResolved: false,
+  };
+
+  if (type && normalizeValue(type)) {
+    filters.type = normalizeValue(type);
+  }
+
+  if (breed && breed.trim()) {
+    filters.breed = {
+      $regex: `^${escapeRegex(breed.trim())}$`,
+      $options: "i",
+    };
+  }
+
+  if (location && location.trim()) {
+    const pattern = escapeRegex(location.trim());
+    filters.$or = [
+      { "location.address": { $regex: pattern, $options: "i" } },
+      { "location.city": { $regex: pattern, $options: "i" } },
+      { "location.state": { $regex: pattern, $options: "i" } },
+    ];
+  }
+
+  if (reportType === "found") {
+    filters.status = "lost";
+  } else if (reportType === "lost") {
+    filters.status = { $in: ["found", "adoption"] };
+  }
+
+  return filters;
+};
+
+const getPrimaryImageUrl = (pet) => pet.images?.[0]?.url || null;
+
+const formatLocationLabel = (location = {}) => {
+  if (typeof location === "string") {
+    return location;
+  }
+
+  return [location.address, location.city, location.state]
+    .filter(Boolean)
+    .join(", ");
+};
+
+const mapPetMatch = (pet, score, index) => ({
+  ...pet,
+  id: String(pet._id),
+  image: getPrimaryImageUrl(pet),
+  images: (pet.images || []).map((entry) => entry.url),
+  location: formatLocationLabel(pet.location),
+  similarity:
+    typeof score === "number"
+      ? Math.round(Math.max(0, Math.min(1, score)) * 100)
+      : Math.max(40, 90 - index * 7),
+  matchReason:
+    index === 0
+      ? "High visual similarity based on the uploaded pet image."
+      : index === 1
+        ? "Strong appearance match with similar pet features."
+        : "Potential image similarity match from the AI service.",
+});
+
+const isAiServiceUnavailable = (error) =>
+  error.code === "ECONNREFUSED" ||
+  error.code === "ECONNRESET" ||
+  error.code === "ETIMEDOUT" ||
+  error.code === "ENOTFOUND";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // @desc    Get all pets (with filters + pagination)
@@ -91,10 +170,140 @@ exports.createPet = asyncHandler(async (req, res) => {
       },
   });
 
+  let embeddingWarning = null;
+  const primaryImageUrl = getPrimaryImageUrl(pet);
+
+  if (primaryImageUrl) {
+    try {
+      await getEmbedding({
+        imageUrl: primaryImageUrl,
+        petId: pet._id.toString(),
+      });
+    } catch (error) {
+      console.error("Pet indexing error:", error.message);
+      embeddingWarning = isAiServiceUnavailable(error)
+        ? "Pet post created, but the image similarity service is not running yet."
+        : "Pet post created, but AI indexing could not be completed.";
+    }
+  }
+
   res.status(201).json({
     success: true,
-    message: "Pet post created",
+    message: embeddingWarning || "Pet post created",
+    embeddingWarning,
     data: pet,
+  });
+});
+
+exports.searchSimilarPets = asyncHandler(async (req, res) => {
+  const { image, location, type, breed, reportType = "lost" } = req.body;
+
+  if (!image) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Image is required" });
+  }
+
+  let uploadedSearchImage;
+
+  try {
+    uploadedSearchImage = await cloudinary.uploader.upload(image, {
+      folder: "pawconnect/similarity-searches",
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: "Could not process the uploaded image for similarity search.",
+    });
+  }
+
+  let embedding;
+
+  try {
+    const embeddingResponse = await getEmbedding({
+      imageUrl: uploadedSearchImage.secure_url,
+    });
+    embedding = embeddingResponse.embedding;
+  } catch (error) {
+    console.error("Similarity embedding error:", error.message);
+    return res.status(isAiServiceUnavailable(error) ? 503 : 500).json({
+      success: false,
+      message: isAiServiceUnavailable(error)
+        ? "The AI similarity service is not running. Start the AI service and try again."
+        : "Failed to generate an image embedding for similarity search.",
+    });
+  }
+
+  let rawMatches = [];
+
+  try {
+    const searchResponse = await searchEmbedding({
+      embedding,
+      topK: 20,
+    });
+    rawMatches = searchResponse.matches || [];
+  } catch (error) {
+    console.error("Similarity search error:", error.message);
+    return res.status(isAiServiceUnavailable(error) ? 503 : 500).json({
+      success: false,
+      message: isAiServiceUnavailable(error)
+        ? "The AI similarity service is not running. Start the AI service and try again."
+        : "AI similarity search failed.",
+    });
+  }
+
+  if (uploadedSearchImage?.public_id) {
+    cloudinary.uploader.destroy(uploadedSearchImage.public_id).catch(() => {});
+  }
+
+  const matchedIds = rawMatches
+    .map((match) => (typeof match === "string" ? match : match.pet_id))
+    .filter(Boolean);
+
+  if (matchedIds.length === 0) {
+    return res.json({
+      success: true,
+      matches: [],
+      message: "No AI matches found yet.",
+    });
+  }
+
+  const filters = buildSearchFilters({
+    location,
+    type,
+    breed,
+    reportType,
+  });
+
+  const pets = await Pet.find({
+    _id: { $in: matchedIds },
+    ...filters,
+  }).lean();
+
+  const petMap = new Map(pets.map((pet) => [String(pet._id), pet]));
+  const matches = rawMatches
+    .map((match, index) => {
+      const petId = typeof match === "string" ? match : match.pet_id;
+      const pet = petMap.get(String(petId));
+
+      if (!pet) {
+        return null;
+      }
+
+      return mapPetMatch(
+        pet,
+        typeof match === "object" ? match.score : null,
+        index
+      );
+    })
+    .filter(Boolean);
+
+  return res.json({
+    success: true,
+    matches,
+    message: `Found ${matches.length} potential AI match${
+      matches.length === 1 ? "" : "es"
+    }.`,
   });
 });
 

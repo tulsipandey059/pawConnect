@@ -20,6 +20,8 @@ import AdoptionFormPage from './pages/adoption/AdoptionFormPage';
 import AboutPage from './pages/info/AboutPage';
 import AIPetHealthPage from './pages/ai/AIPetHealthPage';
 import BreedDetectionPage from './pages/ai/BreedDetectionPage';
+import ImageSimilaritySearchPage from './pages/ai/ImageSimilaritySearchPage';
+import ImageSimilarityResultsPage from './pages/ai/ImageSimilarityResultsPage';
 import NotificationsPage from './pages/notifications/NotificationsPage';
 import ProfilePage from './pages/profile/ProfilePage';
 import VolunteerPage from './pages/volunteer/VolunteerPage';
@@ -78,6 +80,9 @@ function App() {
                 <Route path="/adoption" element={<AdoptionPage />} />
                 <Route path="/ai/disease" element={<AIPetHealthPage />} />
                 <Route path="/ai/breed" element={<BreedDetectionPage />} />
+                <Route path="/ai/image-search" element={<ImageSimilaritySearchPage />} />
+                <Route path="/ai/image-search/results" element={<ImageSimilarityResultsPage />} />
+                <Route path="/ai/visual-match" element={<ImageSimilaritySearchPage />} />
                 <Route path="/ai/chat" element={<AIChatPage />} />
                 <Route path="/rescue" element={<EmergencyRescuePage />} />
                 <Route path="/notifications" element={<NotificationsPage />} />

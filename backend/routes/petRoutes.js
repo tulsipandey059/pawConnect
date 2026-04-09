@@ -6,6 +6,7 @@ const {
   getAllPets,
   getPet,
   createPet,
+  searchSimilarPets,
   updatePet,
   updatePetImages,
   deletePet,
@@ -32,8 +33,9 @@ const petRules = [
 ];
 
 // ─── Public routes ────────────────────────────────────────────────────────────
-router.get("/",           getAllPets);
-router.get("/:id",        getPet);
+router.get("/", getAllPets);
+router.post("/similarity-search", searchSimilarPets);
+router.get("/:id", getPet);
 
 // ─── Private routes ───────────────────────────────────────────────────────────
 

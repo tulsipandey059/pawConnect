@@ -35,7 +35,11 @@ const ReportLostPetPage = () => {
     if (formData.image && step === 'form') {
       setIsMatching(true);
       try {
-        const result = await aiService.checkSimilarPets(formData.image, 'lost');
+        const result = await aiService.checkSimilarPets(formData.image, 'lost', {
+          location: formData.location,
+          type: formData.species,
+          breed: formData.breed,
+        });
         if (result.success) {
           setMatches(result.matches);
           setUploadedImage(formData.image);

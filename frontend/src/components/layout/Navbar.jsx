@@ -73,6 +73,15 @@ const Navbar = () => {
                 <ul className="absolute top-full left-0 mt-2 w-48 bg-white shadow-2xl rounded-2xl border border-gray-200 py-2 z-50">
                   <li>
                     <Link 
+                      to="/ai/image-search" 
+                      className="block px-4 py-3 text-sm text-text-dark hover:bg-primary-orange/5 hover:text-primary-orange transition-all w-full text-left font-medium" 
+                      onClick={() => setShowAITools(false)}
+                    >
+                      Image Similarity Search
+                    </Link>
+                  </li>
+                  <li>
+                    <Link 
                       to="/breed-detect" 
                       className="block px-4 py-3 text-sm text-text-dark hover:bg-primary-orange/5 hover:text-primary-orange transition-all w-full text-left font-medium" 
                       onClick={() => setShowAITools(false)}
@@ -170,6 +179,12 @@ const Navbar = () => {
                 </button>
                 {showAITools && (
                   <div className="pl-8 space-y-2 bg-light-accent/30 py-2 rounded-r-xl mx-4 mt-1 border-r-2 border-primary-orange/30">
+                    <Link to="/ai/image-search" className="block py-2 pl-4 pr-8 text-sm text-text-dark/80 hover:text-primary-orange transition-colors" onClick={() => {
+                      setShowAITools(false);
+                      setIsOpen(false);
+                    }}>
+                      Image Similarity Search
+                    </Link>
                     <Link to="/breed-detect" className="block py-2 pl-4 pr-8 text-sm text-text-dark/80 hover:text-primary-orange transition-colors" onClick={() => {
                       setShowAITools(false);
                       setIsOpen(false);

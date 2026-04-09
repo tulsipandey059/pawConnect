@@ -1,6 +1,25 @@
 // AI Service for breed detection, disease prediction, pet matching
-import { petsData } from '../data/pets.js';
 import apiClient from './api.js';
+
+const convertFileToBase64 = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+  });
+
+const normalizeImageInput = async (imageInput) => {
+  if (!imageInput) {
+    return null;
+  }
+
+  if (typeof imageInput === 'string') {
+    return imageInput;
+  }
+
+  return convertFileToBase64(imageInput);
+};
 
 export const aiService = {
   detectBreed: async (imageFile) => {
@@ -34,36 +53,24 @@ export const aiService = {
     };
   },
 
-  checkSimilarPets: async (imageFile, reportType = 'lost') => {
-    // Simulate AI processing time
-    await new Promise(resolve => setTimeout(resolve, 3000));
+  checkSimilarPets: async (imageInput, reportType = 'lost', filters = {}) => {
+    if (!imageInput) {
+      return {
+        success: true,
+        matches: [],
+        message: 'No image provided for similarity search.',
+      };
+    }
 
-    // Filter relevant pets for matching
-    let candidates = petsData.filter(pet => {
-      if (reportType === 'found') {
-        // For found reports, match against LOST pets
-        return pet.status === 'Lost';
-      } else {
-        // For lost reports, match against FOUND or Adoption pets
-        return pet.status === 'Found' || pet.status === 'Adoption';
-      }
+    const image = await normalizeImageInput(imageInput);
+
+    return apiClient.post('/pets/similarity-search', {
+      image,
+      reportType,
+      location: filters.location || '',
+      type: filters.type || '',
+      breed: filters.breed || '',
     });
-
-    // Mock similarity scores (in real app, use actual AI vision model)
-    const matches = candidates.slice(0, 4).map((pet, index) => ({
-      ...pet,
-      similarity: 95 - (index * 5), // 95%, 90%, 85%, 80%
-      matchReason: index === 0 ? 'High visual similarity - same breed and color pattern' :
-                   index === 1 ? 'Similar breed and size' :
-                   index === 2 ? 'Location proximity match' :
-                   'General similarity detected'
-    }));
-
-    return {
-      success: true,
-      matches,
-      message: `Found ${matches.length} potential matches. Review details to see if any belong to your pet!`
-    };
   }
 };
 

@@ -35,7 +35,7 @@ const Footer = () => {
             <h3 className="font-semibold text-text-dark mb-4">Platform</h3>
             <ul className="space-y-2">
               <li><Link to="/pets" className="text-text-dark/70 hover:text-primary-orange transition-colors duration-300 block">Browse Pets</Link></li>
-              <li><Link to="/reports" className="text-text-dark/70 hover:text-primary-orange transition-colors duration-300 block">Lost Pets</Link></li>
+              <li><Link to="/lost-pets" className="text-text-dark/70 hover:text-primary-orange transition-colors duration-300 block">Lost Pets</Link></li>
               <li><Link to="/adoption" className="text-text-dark/70 hover:text-primary-orange transition-colors duration-300 block">Adoption</Link></li>
               <li><Link to="/add-pet" className="text-text-dark/70 hover:text-primary-orange transition-colors duration-300 block">Report Pet</Link></li>
               <li><Link to="/volunteer" className="text-text-dark/70 hover:text-primary-orange transition-colors duration-300 block">Volunteer</Link></li>
@@ -47,8 +47,9 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold text-text-dark mb-4">AI Tools</h3>
             <ul className="space-y-2">
+              <li><Link to="/ai/image-search" className="text-text-dark/70 hover:text-primary-orange transition-colors duration-300 block">Image Similarity Search</Link></li>
               <li><Link to="/breed-detect" className="text-text-dark/70 hover:text-primary-orange transition-colors duration-300 block">Breed Detection</Link></li>
-              <li><Link to="/pet-health" className="text-text-dark/70 hover:text-primary-orange transition-colors duration-300 block">Pet Health</Link></li>
+              <li><Link to="/health" className="text-text-dark/70 hover:text-primary-orange transition-colors duration-300 block">Pet Health</Link></li>
               <li><Link to="/ai/chat" className="text-text-dark/70 hover:text-primary-orange transition-colors duration-300 block">AI Chat Assistant</Link></li>
             </ul>
           </div>
