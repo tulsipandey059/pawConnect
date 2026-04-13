@@ -3,6 +3,8 @@ const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
 
 module.exports = function(passport) {
+  // Google OAuth disabled until credentials added
+  /*
   passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -27,7 +29,7 @@ module.exports = function(passport) {
           googleId: profile.id,
           name: profile.displayName,
           email: profile.emails[0].value,
-          role: 'user', // default
+          role: 'owner', // default
           avatar: profile.photos[0]?.value || ''
         });
       }
@@ -36,8 +38,9 @@ module.exports = function(passport) {
     } catch (err) {
       return done(err, null);
     }
-  }));
-
+  });
+  */
+  
   passport.serializeUser((user, done) => {
     done(null, user.id);
   });
@@ -50,4 +53,4 @@ module.exports = function(passport) {
       done(err, null);
     }
   });
-};
+}; // Google OAuth: Uncomment + add GOOGLE_CLIENT_ID/SECRET to .env later

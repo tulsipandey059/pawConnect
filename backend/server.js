@@ -14,9 +14,6 @@ const emergencyRoutes  = require("./routes/emergencyRoutes");
 const adoptionRoutes   = require("./routes/adoptionRoutes");
 const petHealthRoutes  = require("./routes/petHealthRoutes");
 
-// Connect to MongoDB
-connectDB();
-
 const app = express();
 
 // ─── Core Middleware ──────────────────────────────────────────────────────────
@@ -89,10 +86,20 @@ app.use((req, res) => {
 app.use(errorHandler);
 
 // ─── Start Server ─────────────────────────────────────────────────────────────
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`\n🐾  PawConnect API v2`);
-  console.log(`🚀  Server  → http://localhost:${PORT}  [${process.env.NODE_ENV || "development"}]`);
-  console.log(`☁️   Cloudinary folder → pawconnect/pets\n`);
-});
+const startServer = async () => {
+  try {
+    await connectDB();
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => {
+      console.log(`\n🐾  PawConnect API v2`);
+      console.log(`🚀  Server  → http://localhost:${PORT}  [${process.env.NODE_ENV || "development"}]`);
+      console.log(`☁️   Cloudinary folder → pawconnect/pets\n`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+startServer();
 

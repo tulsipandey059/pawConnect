@@ -13,7 +13,12 @@ function ImageSimilarityResultsPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const initialFilters = useMemo(
-    () => location.state?.filters || loadSearchPayload(),
+    () => {
+      const storedFilters = location.state?.filters || loadSearchPayload();
+      return storedFilters
+        ? { status: 'all', ...storedFilters }
+        : null;
+    },
     [location.state]
   );
   const [filters, setFilters] = useState(
@@ -68,6 +73,7 @@ function ImageSimilarityResultsPage() {
 
     try {
       const persistedFilters = {
+        status: activeFilters.status || 'all',
         location: activeFilters.location.trim(),
         type: activeFilters.type,
         breed: activeFilters.breed,
@@ -77,11 +83,15 @@ function ImageSimilarityResultsPage() {
       saveSearchPayload(persistedFilters);
       setFilters({ ...persistedFilters, imageFile: null });
 
-      const response = await aiService.checkSimilarPets(imageData, '', {
+      const response = await aiService.checkSimilarPets(
+        imageData,
+        activeFilters.status || 'all',
+        {
         location: activeFilters.location.trim(),
         type: activeFilters.type,
         breed: activeFilters.breed,
-      });
+        }
+      );
 
       setResults(response.matches || []);
       setMessage(response.message || '');

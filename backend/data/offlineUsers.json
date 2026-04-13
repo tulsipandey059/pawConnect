@@ -1,0 +1,58 @@
+[
+  {
+    "_id": "507f1f77bcf86cd799439010",
+    "name": "Test User",
+    "email": "test@example.com",
+    "password": "password",
+    "role": "owner",
+    "phone": "+91 98765 43210",
+    "city": "Mumbai",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "avatar": ""
+  },
+  {
+    "_id": "507f1f77bcf86cd799439011",
+    "name": "NGO Admin",
+    "email": "ngo@pawconnect.com",
+    "password": "password",
+    "role": "ngo",
+    "phone": "+91 98765 43211",
+    "city": "Delhi",
+    "createdAt": "2024-01-02T00:00:00.000Z",
+    "avatar": ""
+  },
+  {
+    "_id": "69d540d50027d7e0874266fd",
+    "name": "petOwner",
+    "email": "petowner01@gmail.com",
+    "role": "owner",
+    "phone": "",
+    "city": "",
+    "avatar": "",
+    "createdAt": "2026-04-07T17:37:25.246Z",
+    "updatedAt": "2026-04-13T18:36:24.368Z"
+  },
+  {
+    "_id": "69d234191682509c3374a857",
+    "name": "petOwner",
+    "email": "petowner02@gmail.com",
+    "role": "volunteer",
+    "phone": "",
+    "city": "",
+    "avatar": "",
+    "createdAt": "2026-04-05T10:06:17.792Z",
+    "updatedAt": "2026-04-13T18:22:11.026Z",
+    "password": "$2b$10$OnYhGlWLWddgowVSXSt7JuHV7EfByxceZfM177oM3errz5on1zfF6"
+  },
+  {
+    "_id": "69dd34c6a2d2843898c39d15",
+    "name": "owner",
+    "email": "petowner@gmail.com",
+    "role": "owner",
+    "phone": "",
+    "city": "",
+    "avatar": "",
+    "createdAt": "2026-04-13T18:24:06.333Z",
+    "updatedAt": "2026-04-13T18:36:15.610Z"
+  }
+]

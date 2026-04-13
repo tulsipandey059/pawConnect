@@ -12,8 +12,6 @@ import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import CallPage from './pages/call/CallPage';
 import ChatPage from './pages/chat/ChatPage';
-import ReportLostPetPage from './pages/reports/ReportLostPetPage';
-import ReportFoundPetPage from './pages/reports/ReportFoundPetPage';
 import MapPage from './pages/map/MapPage';
 import AdoptionPage from './pages/adoption/AdoptionPage';
 import AdoptionFormPage from './pages/adoption/AdoptionFormPage';
@@ -61,8 +59,8 @@ function App() {
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/call/:petId" element={<CallPage />} />
                 <Route path="/chat/:petId" element={<ChatPage />} />
-                <Route path="/report-lost" element={<ReportLostPetPage />} />
-                <Route path="/report-found" element={<ReportFoundPetPage />} />
+                <Route path="/report-lost" element={<AddPetPage initialStatus="lost" />} />
+                <Route path="/report-found" element={<AddPetPage initialStatus="found" />} />
                 <Route path="/pets" element={<BrowsePetsPage />} />
                 <Route path="/my-pets" element={
                   <ProtectedRoute>
@@ -73,7 +71,7 @@ function App() {
                 <Route path="/pets/:id" element={<PetDetailsPage />} />
                 <Route path="/adoption/apply" element={<AdoptionFormPage />} />
                 <Route path="/map" element={<MapPage />} />
-                <Route path="/report-sighting/:petId" element={<ReportLostPetPage />} />
+                <Route path="/report-sighting/:petId" element={<AddPetPage initialStatus="found" />} />
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/health" element={<AIPetHealthPage />} />
                 <Route path="/breed-detect" element={<BreedDetectionPage />} />

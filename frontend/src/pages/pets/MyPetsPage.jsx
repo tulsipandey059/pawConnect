@@ -1,25 +1,44 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { usePets } from '../../context/PetContext';
 import PetCard from '../../components/pets/PetCard';
+import petService from '../../services/petService';
 
 const MyPetsPage = () => {
-  const { currentUser } = useAuth();
-  const { pets } = usePets();
+  const [myPets, setMyPets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const ownerId = currentUser?.id ?? currentUser?._id;
-  const myPets = pets.filter((pet) => {
-    if (ownerId && pet.ownerId?.toString() === ownerId.toString()) {
-      return true;
-    }
+  useEffect(() => {
+    let isActive = true;
 
-    if (currentUser?.email && pet.ownerEmail === currentUser.email) {
-      return true;
-    }
+    const loadMyPets = async () => {
+      try {
+        setLoading(true);
+        setError('');
+        const response = await petService.getMyPets();
 
-    return false;
-  });
+        if (isActive) {
+          setMyPets(response.pets || []);
+        }
+      } catch (loadError) {
+        console.error('Failed to load my pets:', loadError);
+        if (isActive) {
+          setMyPets([]);
+          setError(loadError?.message || 'Could not load your pet reports.');
+        }
+      } finally {
+        if (isActive) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadMyPets();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-warm-beige py-12 px-4 sm:px-6 lg:px-8">
@@ -31,7 +50,17 @@ const MyPetsPage = () => {
           </p>
         </div>
 
-        {myPets.length > 0 ? (
+        {error ? (
+          <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-red-700">
+            {error}
+          </div>
+        ) : null}
+
+        {loading ? (
+          <div className="bg-white rounded-3xl shadow-soft p-12 text-center">
+            <h2 className="text-2xl font-bold text-text-dark mb-3">Loading your pets...</h2>
+          </div>
+        ) : myPets.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {myPets.map((pet) => (
               <PetCard key={pet.id} pet={pet} />

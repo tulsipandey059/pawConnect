@@ -1,5 +1,6 @@
-import { API_BASE } from './api.js';
-import { petsData } from '../data/pets.js';
+import { API_BASE } from './api';
+import { petsData } from '../data/pets';
+import { getStoredToken } from '../utils/authStorage';
 
 const normalizeStatus = (status = '') => String(status).trim().toLowerCase();
 
@@ -40,6 +41,10 @@ const normalizePet = (pet) => {
   const image = pet.image || images[0] || '';
   const postedBy =
     typeof pet.postedBy === 'object' && pet.postedBy !== null ? pet.postedBy : null;
+  const postedById =
+    typeof pet.postedBy === 'string'
+      ? pet.postedBy
+      : postedBy?._id || postedBy?.id || '';
 
   return {
     ...pet,
@@ -51,7 +56,7 @@ const normalizePet = (pet) => {
     images,
     location: formatLocation(pet.location),
     tags: normalizeTags(pet, type, pet.breed),
-    ownerId: pet.ownerId || postedBy?._id || postedBy?.id || '',
+    ownerId: pet.ownerId || postedById || '',
     ownerEmail: pet.ownerEmail || postedBy?.email || '',
     contact: pet.contact || postedBy?.phone || pet.contactDetails || '',
   };
@@ -105,7 +110,7 @@ const buildCreatePayload = (petData) => {
 };
 
 const getAuthHeader = () => {
-  const token = localStorage.getItem('token');
+  const token = getStoredToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
@@ -142,6 +147,26 @@ export const petService = {
     }
 
     return normalizePet(payload?.data || {});
+  },
+
+  getMyPets: async () => {
+    const response = await fetch(`${API_BASE}/pets/user/my-posts`, {
+      headers: getAuthHeader(),
+    });
+
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      throw new Error(
+        payload?.message || `Could not load your pet reports (${response.status}).`
+      );
+    }
+
+    return {
+      pets: normalizePets(payload?.data || []),
+      stats: payload?.stats || {},
+      note: payload?._note || '',
+    };
   },
 };
 

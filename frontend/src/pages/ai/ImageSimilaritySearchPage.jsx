@@ -5,6 +5,7 @@ import PetDetailsFields from '../../components/similarity/PetDetailsFields';
 import { saveSearchPayload } from '../../utils/searchState';
 
 const initialSearch = {
+  status: 'all',
   location: '',
   type: 'dog',
   breed: '',
@@ -56,6 +57,7 @@ function ImageSimilaritySearchPage() {
     try {
       const imageData = await convertFileToBase64(filters.imageFile);
       const payload = {
+        status: filters.status || 'all',
         location: filters.location.trim(),
         type: filters.type,
         breed: filters.breed,
@@ -76,7 +78,6 @@ function ImageSimilaritySearchPage() {
     <section className="page-section">
       <div className="shell page-stack">
         <div className="page-intro">
-          <span className="eyebrow">Search workflow</span>
           <h1>Search for similar pet matches</h1>
           <p>
             Upload the pet photo and refine the similarity query with the pet&apos;s

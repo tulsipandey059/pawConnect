@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const { getJwtSecret } = require("../utils/generateToken");
+const { findOfflineUserById } = require("../data/mockUsers");
 
 // Protect routes — must be logged in
 exports.protect = async (req, res, next) => {
@@ -16,13 +17,36 @@ exports.protect = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, getJwtSecret());
-    req.user = await User.findById(decoded.id).select("-password");
 
-    if (!req.user) {
-      return res.status(401).json({ success: false, message: "User no longer exists." });
+    // Try MongoDB first with a short timeout
+    try {
+      req.user = await Promise.race([
+        User.findById(decoded.id).select("-password"),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 2000))
+      ]);
+      if (req.user) {
+        return next();
+      }
+    } catch (dbError) {
+      console.warn("Database lookup timeout/failed, using mock users");
     }
 
-    next();
+    // Fallback to mock users
+    const mockUser = findOfflineUserById(decoded.id);
+    if (mockUser) {
+      req.user = {
+        _id: mockUser._id,
+        id: mockUser._id,
+        name: mockUser.name,
+        email: mockUser.email,
+        role: mockUser.role,
+        phone: mockUser.phone,
+        city: mockUser.city,
+      };
+      return next();
+    }
+
+    return res.status(401).json({ success: false, message: "User no longer exists." });
   } catch (error) {
     return res.status(401).json({ success: false, message: "Invalid or expired token." });
   }
@@ -63,7 +87,32 @@ exports.attachUserIfPresent = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, getJwtSecret());
-    req.user = await User.findById(decoded.id).select("-password");
+
+    // Try MongoDB first
+    try {
+      req.user = await User.findById(decoded.id).select("-password");
+      if (req.user) {
+        return next();
+      }
+    } catch (dbError) {
+      console.warn("⚠️  Database lookup failed, checking mock users");
+    }
+
+    // Fallback to mock users
+    const mockUser = findOfflineUserById(decoded.id);
+    if (mockUser) {
+      req.user = {
+        _id: mockUser._id,
+        id: mockUser._id,
+        name: mockUser.name,
+        email: mockUser.email,
+        role: mockUser.role,
+        phone: mockUser.phone,
+        city: mockUser.city,
+      };
+    } else {
+      req.user = null;
+    }
   } catch (error) {
     req.user = null;
   }

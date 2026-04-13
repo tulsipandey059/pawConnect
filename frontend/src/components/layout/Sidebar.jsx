@@ -22,8 +22,8 @@ const Sidebar = ({ isOpen, onClose }) => {
         return [
           ...common,
           { to: '/my-pets', label: 'My Pets', icon: 'Pets' },
-          { to: '/report-lost', label: 'Report Lost Pet', icon: 'Lost' },
-          { to: '/report-found', label: 'Report Found Pet', icon: 'Found' },
+          { to: '/add-pet', label: 'Report Pet', icon: 'Report' },
+          { to: '/ai/image-search', label: 'Image Similarity Search', icon: 'Search' },
           { to: '/ai/chat', label: 'AI Assistant', icon: 'AI' },
         ];
       case 'ngo':

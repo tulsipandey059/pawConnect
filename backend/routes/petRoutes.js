@@ -35,12 +35,14 @@ const petRules = [
 // ─── Public routes ────────────────────────────────────────────────────────────
 router.get("/", getAllPets);
 router.post("/similarity-search", searchSimilarPets);
-router.get("/:id", getPet);
 
 // ─── Private routes ───────────────────────────────────────────────────────────
 
-// My posts — must come before /:id so it isn't swallowed by the param route
+// My posts — must come BEFORE /:id so it isn't swallowed by the param route
 router.get("/user/my-posts", protect, getMyPets);
+
+// Get single pet by ID — must come after other specific routes
+router.get("/:id", getPet);
 
 // POST /api/pets         — create with optional image upload
 // POST /api/pets/add-pet — canonical alias requested in brief

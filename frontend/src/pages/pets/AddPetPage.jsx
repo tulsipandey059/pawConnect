@@ -1,28 +1,39 @@
-import React, { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { usePets } from '../../context/PetContext';
 import { useAuth } from '../../context/AuthContext';
 import ImageUpload from '../../components/similarity/ImageUpload';
 import PetDetailsFields from '../../components/similarity/PetDetailsFields';
 
-const initialForm = {
+const createInitialForm = (status = 'lost') => ({
   name: '',
-  status: 'lost',
+  status,
   location: '',
   type: 'dog',
   breed: '',
   imageFile: null,
   contactDetails: '',
-};
+});
 
-function AddPetPage() {
+function AddPetPage({ initialStatus = 'lost' }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { addPet } = usePets();
   const { currentUser } = useAuth();
+  const routeStatus = location.state?.initialStatus;
+  const resolvedInitialStatus = routeStatus === 'found' ? 'found' : initialStatus;
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState(initialForm);
+  const [formData, setFormData] = useState(() => createInitialForm(resolvedInitialStatus));
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    const nextStatus = routeStatus === 'found' ? 'found' : initialStatus;
+
+    setFormData((current) =>
+      current.status === nextStatus ? current : { ...current, status: nextStatus }
+    );
+  }, [routeStatus, initialStatus]);
 
   const canContinue = useMemo(() => {
     return Boolean(

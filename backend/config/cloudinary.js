@@ -1,6 +1,7 @@
 const cloudinary = require("cloudinary");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const multer = require("multer");
+const path = require("path");
 
 // ─── 1. Configure Cloudinary SDK ─────────────────────────────────────────────
 cloudinary.config({
@@ -9,30 +10,39 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// ─── 2. Cloudinary Storage Engine for Multer ─────────────────────────────────
-//  - Images land directly in Cloudinary (never touch disk)
-//  - Organised by feature folder inside your cloud account
-//  - Auto-converted to webp for faster delivery
-const petImageStorage = new CloudinaryStorage({
-  cloudinary,
-  params: async (req, file) => ({
-    folder: "pawconnect/pets",          // logical folder in Cloudinary
-    allowed_formats: ["jpg", "jpeg", "png", "webp"],
-    transformation: [
-      { width: 1200, height: 900, crop: "limit" }, // cap resolution
-      { quality: "auto:good" },                    // smart compression
-      { fetch_format: "auto" },                    // serve webp where supported
-    ],
-    public_id: `pet_${Date.now()}_${Math.round(Math.random() * 1e6)}`,
-  }),
-});
+// ─── Check if Cloudinary is configured ──────────────────────────────────────
+const isCloudinaryConfigured = !!(
+  process.env.CLOUDINARY_CLOUD_NAME &&
+  process.env.CLOUDINARY_API_KEY &&
+  process.env.CLOUDINARY_API_SECRET
+);
 
-// ─── 3. Multer upload instance ────────────────────────────────────────────────
+// ─── 2. Fallback Storage (Memory) for offline mode ────────────────────────────
+const memoryStorage = multer.memoryStorage();
+
+// ─── 3. Cloudinary Storage Engine for Multer ─────────────────────────────────
+const petImageStorage = isCloudinaryConfigured
+  ? new CloudinaryStorage({
+      cloudinary,
+      params: async (req, file) => ({
+        folder: "pawconnect/pets",
+        allowed_formats: ["jpg", "jpeg", "png", "webp"],
+        transformation: [
+          { width: 1200, height: 900, crop: "limit" },
+          { quality: "auto:good" },
+          { fetch_format: "auto" },
+        ],
+        public_id: `pet_${Date.now()}_${Math.round(Math.random() * 1e6)}`,
+      }),
+    })
+  : memoryStorage;
+
+// ─── 4. Multer upload instance ────────────────────────────────────────────────
 const uploadPetImages = multer({
   storage: petImageStorage,
   limits: {
-    fileSize: 5 * 1024 * 1024,   // 5 MB per image
-    files: 5,                     // max 5 images per request
+    fileSize: 5 * 1024 * 1024,
+    files: 5,
   },
   fileFilter: (req, file, cb) => {
     const allowed = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -46,12 +56,14 @@ const uploadPetImages = multer({
   },
 });
 
-// ─── 4. Helper: delete an image from Cloudinary ──────────────────────────────
-//  Use this when a pet post is deleted so orphan images are cleaned up
+// ─── 5. Helper: delete an image from Cloudinary ──────────────────────────────
 const deleteFromCloudinary = async (imageUrl) => {
+  if (!isCloudinaryConfigured) {
+    console.log("⚠️  Cloudinary not configured, skipping delete");
+    return null;
+  }
+
   try {
-    // Extract public_id from the full URL
-    // e.g. https://res.cloudinary.com/<cloud>/image/upload/v123/pawconnect/pets/pet_xyz.jpg
     const parts = imageUrl.split("/");
     const filenameWithExt = parts[parts.length - 1];
     const filename = filenameWithExt.split(".")[0];
@@ -66,4 +78,10 @@ const deleteFromCloudinary = async (imageUrl) => {
   }
 };
 
-module.exports = { cloudinary, uploadPetImages, deleteFromCloudinary };
+// Log startup message
+if (!isCloudinaryConfigured) {
+  console.log("⚠️  Cloudinary not configured - using memory storage for image uploads");
+  console.log("   Add CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET to .env for production");
+}
+
+module.exports = { cloudinary, uploadPetImages, deleteFromCloudinary, isCloudinaryConfigured };

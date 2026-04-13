@@ -1,9 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { usePets } from '../../context/PetContext';
+import DashboardQuickReport from './DashboardQuickReport';
 import Topbar from '../../components/layout/Topbar';
 import Sidebar from '../../components/layout/Sidebar';
 import DesktopSidebar from '../../components/layout/DesktopSidebar';
+import petService from '../../services/petService';
+import placeholderImage from '../../assets/images/pets/placeholder.jpg';
 
 const ownerPetsSeed = [
   { id: 1, name: 'Max', breed: 'Golden Retriever', status: 'Lost', location: 'Central Park' },
@@ -36,24 +40,81 @@ const adminUsersSeed = [
   { id: 4, name: 'Care Rescue NGO', email: 'ngo@example.com', role: 'ngo', status: 'Suspended' },
 ];
 
-const initialOwnerReport = {
-  petName: '',
-  breed: '',
-  location: '',
-  description: '',
+const getPetImageSrc = (pet) => {
+  const firstImage = Array.isArray(pet?.images) ? pet.images[0] : null;
+
+  if (typeof firstImage === 'string' && firstImage.trim()) {
+    return firstImage;
+  }
+
+  if (firstImage && typeof firstImage === 'object' && firstImage.url) {
+    return firstImage.url;
+  }
+
+  if (typeof pet?.image === 'string' && pet.image.trim()) {
+    return pet.image;
+  }
+
+  return placeholderImage;
 };
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { currentUser } = useAuth();
+  const { pets = [], loading: petsLoading } = usePets();
+  const [myReportedPets, setMyReportedPets] = useState([]);
+  const [myReportedPetsLoading, setMyReportedPetsLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [ownerReportDraft, setOwnerReportDraft] = useState(initialOwnerReport);
   const [ngoRequests, setNgoRequests] = useState(ngoRequestsSeed);
   const [volunteerTasks, setVolunteerTasks] = useState(volunteerTasksSeed);
   const [adminUsers, setAdminUsers] = useState(adminUsersSeed);
   const [dashboardNotice, setDashboardNotice] = useState('');
+  const [myPetsLoadError, setMyPetsLoadError] = useState('');
   const assignedTasksRef = useRef(null);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const loadMyPets = async () => {
+      if (!currentUser || currentUser.role !== 'owner') {
+        if (isActive) {
+          setMyReportedPets([]);
+          setMyReportedPetsLoading(false);
+          setMyPetsLoadError('');
+        }
+        return;
+      }
+
+      try {
+        setMyReportedPetsLoading(true);
+        setMyPetsLoadError('');
+        const response = await petService.getMyPets();
+
+        if (isActive) {
+          setMyReportedPets(response.pets || []);
+        }
+      } catch (error) {
+        console.error('Failed to load dashboard pet reports:', error);
+        if (isActive) {
+          setMyReportedPets([]);
+          setMyPetsLoadError(
+            error?.message || 'Could not load your pet reports right now.'
+          );
+        }
+      } finally {
+        if (isActive) {
+          setMyReportedPetsLoading(false);
+        }
+      }
+    };
+
+    loadMyPets();
+
+    return () => {
+      isActive = false;
+    };
+  }, [currentUser?._id, currentUser?.id, currentUser?.role]);
 
   useEffect(() => {
     if (location.hash === '#assigned-tasks' && currentUser?.role === 'volunteer') {
@@ -68,28 +129,27 @@ const Dashboard = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleQuickRoute = (path, message) => {
+  const handleQuickRoute = (path, message, state) => {
     if (message) {
       showNotice(message);
     }
-    navigate(path);
+    navigate(path, state ? { state } : undefined);
   };
 
-  const handleOwnerDraftChange = (field, value) => {
-    setOwnerReportDraft((prev) => ({ ...prev, [field]: value }));
+  const handleOwnerReportSubmitted = (pet) => {
+    setMyReportedPets((prev) => {
+      const petId = String(pet._id || pet.id);
+      const nextPets = prev.filter(
+        (existingPet) => String(existingPet._id || existingPet.id) !== petId
+      );
+
+      return [pet, ...nextPets];
+    });
+
+    showNotice(`${pet.name} was reported successfully as ${pet.status}.`);
   };
 
-  const handleOwnerReportSubmit = () => {
-    const hasEmptyField = Object.values(ownerReportDraft).some((value) => !value.trim());
 
-    if (hasEmptyField) {
-      showNotice('Fill in pet name, breed, location, and description before continuing.');
-      return;
-    }
-
-    showNotice(`Prepared a lost-pet report for ${ownerReportDraft.petName}. Finish it on the report page.`);
-    navigate('/report-lost');
-  };
 
   const handleNgoRequestStatus = (requestId, nextStatus) => {
     const updatedRequest = ngoRequests.find((request) => request.id === requestId);
@@ -266,6 +326,9 @@ const Dashboard = () => {
       return <div className="text-center py-20 text-text-dark text-xl font-semibold">Loading your dashboard...</div>;
     }
 
+    const ownerDashboardPets = myReportedPets;
+    const nearbyPets = pets;
+    const nearbyLostPets = nearbyPets.filter((pet) => pet.status === 'lost');
     const roleTitle =
       currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1).toLowerCase() + ' Dashboard';
 
@@ -273,71 +336,77 @@ const Dashboard = () => {
       return (
         <div className="space-y-8">
           <div className="bg-white rounded-3xl shadow-soft p-8">
-            <h2 className="text-2xl font-bold text-text-dark mb-6">Report Lost Pet</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <input
-                className="p-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary-orange outline-none placeholder:text-gray-400"
-                placeholder="Pet Name"
-                value={ownerReportDraft.petName}
-                onChange={(event) => handleOwnerDraftChange('petName', event.target.value)}
-              />
-              <input
-                className="p-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary-orange outline-none placeholder:text-gray-400"
-                placeholder="Breed / Type"
-                value={ownerReportDraft.breed}
-                onChange={(event) => handleOwnerDraftChange('breed', event.target.value)}
-              />
-              <input
-                className="p-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary-orange outline-none placeholder:text-gray-400"
-                placeholder="Last Location"
-                value={ownerReportDraft.location}
-                onChange={(event) => handleOwnerDraftChange('location', event.target.value)}
-              />
-              <input
-                className="md:col-span-2 p-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary-orange outline-none placeholder:text-gray-400"
-                placeholder="Description"
-                value={ownerReportDraft.description}
-                onChange={(event) => handleOwnerDraftChange('description', event.target.value)}
-              />
-              <div className="md:col-span-3" />
-              <button
-                className="md:col-span-3 bg-primary-orange text-white py-4 px-8 rounded-2xl font-bold text-lg hover:bg-orange-500 transition-all shadow-lg hover:shadow-xl w-full md:w-auto"
-                onClick={handleOwnerReportSubmit}
-              >
-                Report Lost Pet
-              </button>
-            </div>
+            <DashboardQuickReport onSubmitted={handleOwnerReportSubmitted} />
           </div>
 
           <div className="bg-white rounded-3xl shadow-soft p-8">
-            <h2 className="text-2xl font-bold text-text-dark mb-6">My Pets ({ownerPetsSeed.length})</h2>
+            <h2 className="text-2xl font-bold text-text-dark mb-6">My Pets ({ownerDashboardPets.length || 0})</h2>
+            {myPetsLoadError ? (
+              <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
+                {myPetsLoadError}
+              </div>
+            ) : null}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {ownerPetsSeed.map((pet) => (
-                <div
-                  key={pet.id}
-                  className="group hover:shadow-xl transition-all rounded-2xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 p-6 border border-gray-200"
-                >
-                  <div className="w-full h-40 bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                    <span className="text-2xl font-semibold text-text-dark/60">{pet.name.slice(0, 1)}</span>
+              {petsLoading || myReportedPetsLoading ? (
+                <div className="col-span-full text-center py-12 text-text-dark/60">Loading your pets...</div>
+              ) : ownerDashboardPets.length > 0 ? (
+                ownerDashboardPets.map((pet) => (
+                  <div
+                    key={pet._id || pet.id}
+                    className="group hover:shadow-xl transition-all rounded-2xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 p-6 border border-gray-200"
+                  >
+                    <div className="w-full h-40 rounded-xl overflow-hidden mb-4 group-hover:scale-105 transition-transform">
+                      <img
+                        src={getPetImageSrc(pet)}
+                        alt={pet.name}
+                        className="w-full h-full object-cover"
+                        onError={(event) => {
+                          event.currentTarget.onerror = null;
+                          event.currentTarget.src = placeholderImage;
+                        }}
+                      />
+                    </div>
+                    <h3 className="font-bold text-xl text-text-dark mb-2">{pet.name}</h3>
+                    <p className="text-text-dark/70 mb-2">{pet.breed}</p>
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        pet.status === 'lost' ? 'bg-red-100 text-red-800' : 
+                        pet.status === 'found' ? 'bg-green-100 text-green-800' : 
+                        'bg-blue-100 text-blue-800'
+                      }`}
+                    >
+                      {pet.status?.charAt(0).toUpperCase() + pet.status?.slice(1) || 'Unknown'}
+                    </span>
+                    <p className="text-sm text-text-dark/50 mt-2">{pet.location?.address || pet.location}</p>
+                    <button
+                      className="w-full mt-4 bg-slate-900 text-white py-2 px-4 rounded-xl font-medium hover:bg-slate-800 transition-all"
+                      onClick={(e) => { e.stopPropagation(); navigate('/my-pets'); }}
+                    >
+                      View Pet List
+                    </button>
                   </div>
-                  <h3 className="font-bold text-xl text-text-dark mb-2">{pet.name}</h3>
-                  <p className="text-text-dark/70 mb-2">{pet.breed}</p>
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      pet.status === 'Lost' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-                    }`}
-                  >
-                    {pet.status}
-                  </span>
-                  <p className="text-sm text-text-dark/50 mt-2">{pet.location}</p>
-                  <button
-                    className="w-full mt-4 bg-slate-900 text-white py-2 px-4 rounded-xl font-medium hover:bg-slate-800 transition-all"
-                    onClick={() => navigate('/my-pets')}
-                  >
-                    View Pet List
-                  </button>
+                ))
+              ) : (
+                <div className="col-span-full bg-white/50 backdrop-blur-sm rounded-3xl p-12 text-center border-2 border-dashed border-gray-300">
+                  <div className="text-6xl mb-6 text-gray-400">🐾</div>
+                  <h3 className="text-2xl font-bold text-text-dark mb-3">No pets yet</h3>
+                  <p className="text-text-dark/60 mb-8 max-w-md mx-auto">Add your first pet or report a lost pet to get started.</p>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button
+                      className="bg-primary-orange text-white px-8 py-3 rounded-2xl font-semibold hover:bg-orange-500 transition-all"
+                      onClick={() => navigate('/add-pet')}
+                    >
+                      Add Pet
+                    </button>
+                    <button
+                      className="bg-slate-900 text-white px-8 py-3 rounded-2xl font-semibold hover:bg-slate-800 transition-all"
+                      onClick={() => handleQuickRoute('/add-pet', '', { initialStatus: 'lost' })}
+                    >
+                      Report Lost
+                    </button>
+                  </div>
                 </div>
-              ))}
+              )}
             </div>
           </div>
 
@@ -374,7 +443,7 @@ const Dashboard = () => {
             <div className="bg-white rounded-3xl shadow-soft p-8 text-center">
               <button
                 className="w-full bg-green-100 hover:bg-green-200 text-green-800 py-6 px-8 rounded-2xl font-bold text-xl transition-all shadow-sm hover:shadow-md"
-                onClick={() => handleQuickRoute('/report-found')}
+                onClick={() => handleQuickRoute('/add-pet', '', { initialStatus: 'found' })}
               >
                 Report Found Pet
               </button>
@@ -420,27 +489,36 @@ const Dashboard = () => {
       return (
         <div className="space-y-8">
           <div className="bg-white rounded-3xl shadow-soft p-8">
-            <h2 className="text-2xl font-bold text-text-dark mb-6">Nearby Lost Pets</h2>
+            <h2 className="text-2xl font-bold text-text-dark mb-6">Nearby Lost Pets ({nearbyLostPets.length || 0})</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {ownerPetsSeed.map((pet) => (
-                <div
-                  key={pet.id}
-                  className="group hover:shadow-xl transition-all rounded-2xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 p-6 border border-gray-200"
-                >
-                  <div className="w-full h-40 bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                    <span className="text-2xl font-semibold text-text-dark/60">{pet.name.slice(0, 1)}</span>
-                  </div>
-                  <h3 className="font-bold text-xl text-text-dark mb-2">{pet.name}</h3>
-                  <p className="text-text-dark/70 mb-2">{pet.breed}</p>
-                  <p className="text-sm text-text-dark/50">{pet.location}</p>
-                  <button
-                    className="w-full mt-4 bg-primary-orange text-white py-2 px-4 rounded-xl font-medium hover:bg-orange-500 transition-all"
-                    onClick={() => handleQuickRoute('/lost-pets')}
+              {petsLoading ? (
+                <div className="col-span-full text-center py-12 text-text-dark/60">Loading nearby pets...</div>
+              ) : nearbyLostPets.length > 0 ? (
+                nearbyLostPets.slice(0, 6).map((pet) => (
+                  <div
+                    key={pet._id || pet.id}
+                    className="group hover:shadow-xl transition-all rounded-2xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 p-6 border border-gray-200 cursor-pointer"
+                    onClick={() => navigate(`/pets/${pet._id || pet.id}`)}
                   >
-                    View Details
-                  </button>
-                </div>
-              ))}
+                    <div className="w-full h-40 rounded-xl overflow-hidden mb-4 group-hover:scale-105 transition-transform">
+                      <img
+                        src={getPetImageSrc(pet)}
+                        alt={pet.name}
+                        className="w-full h-full object-cover"
+                        onError={(event) => {
+                          event.currentTarget.onerror = null;
+                          event.currentTarget.src = placeholderImage;
+                        }}
+                      />
+                    </div>
+                    <h3 className="font-bold text-xl text-text-dark mb-2">{pet.name}</h3>
+                    <p className="text-text-dark/70 mb-2">{pet.breed}</p>
+                    <p className="text-sm text-text-dark/50">{pet.location?.address || pet.location}</p>
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-full text-center py-12 text-text-dark/60">No lost pets nearby</div>
+              )}
             </div>
           </div>
 
@@ -545,43 +623,66 @@ const Dashboard = () => {
       return (
         <div className="space-y-8">
           <div className="bg-white rounded-3xl shadow-soft p-8">
-            <h2 className="text-2xl font-bold text-text-dark mb-6">Nearby Lost and Found Pets ({ownerPetsSeed.length})</h2>
+            <h2 className="text-2xl font-bold text-text-dark mb-6">Nearby Lost and Found Pets ({nearbyPets.length || 0})</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {ownerPetsSeed.map((pet) => (
-                <div key={pet.id} className="relative group">
-                  <div className="w-full h-48 bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl flex items-center justify-center group-hover:scale-105 transition-all overflow-hidden shadow-lg">
-                    <span className="text-3xl font-semibold text-text-dark/70">{pet.name}</span>
-                  </div>
-                  <div className="p-4 bg-white rounded-b-2xl -mt-4 shadow-lg">
-                    <h4 className="font-bold text-lg text-text-dark mb-1">{pet.name}</h4>
-                    <p className="text-sm text-text-dark/70 mb-2">{pet.breed}</p>
-                    <div className="flex gap-2 mb-3">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-bold ${
-                          pet.status === 'Lost' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-                        }`}
-                      >
-                        {pet.status}
-                      </span>
-                      <span className="px-2 py-1 bg-gray-100 text-xs rounded-full font-medium">1.2km</span>
+              {petsLoading ? (
+                <div className="col-span-full text-center py-12 text-text-dark/60">Loading pets...</div>
+              ) : nearbyPets.length > 0 ? (
+                nearbyPets.slice(0, 6).map((pet) => (
+                  <div key={pet._id || pet.id} className="relative group">
+                    <div className="w-full h-48 rounded-2xl overflow-hidden shadow-lg group-hover:scale-105 transition-all">
+                      <img
+                        src={getPetImageSrc(pet)}
+                        alt={pet.name}
+                        className="w-full h-full object-cover"
+                        onError={(event) => {
+                          event.currentTarget.onerror = null;
+                          event.currentTarget.src = placeholderImage;
+                        }}
+                      />
                     </div>
-                    <div className="flex gap-2">
-                      <button
-                        className="flex-1 bg-primary-orange text-white text-sm py-2 px-3 rounded-xl font-medium hover:bg-orange-500"
-                        onClick={() => handleQuickRoute('/report-found', `Opening a found-pet report for ${pet.name}.`)}
-                      >
-                        I Found It
-                      </button>
-                      <button
-                        className="flex-1 bg-blue-500 text-white text-sm py-2 px-3 rounded-xl font-medium hover:bg-blue-600"
-                        onClick={() => handleVolunteerHelpSearch(pet)}
-                      >
-                        Help Search
-                      </button>
+                    <div className="p-4 bg-white rounded-b-2xl -mt-4 shadow-lg">
+                      <h4 className="font-bold text-lg text-text-dark mb-1">{pet.name}</h4>
+                      <p className="text-sm text-text-dark/70 mb-2">{pet.breed}</p>
+                      <div className="flex gap-2 mb-3">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-bold ${
+                            pet.status === 'lost' ? 'bg-red-100 text-red-800' : 
+                            pet.status === 'found' ? 'bg-green-100 text-green-800' : 
+                            'bg-blue-100 text-blue-800'
+                          }`}
+                        >
+                          {pet.status?.charAt(0).toUpperCase() + pet.status?.slice(1) || 'Unknown'}
+                        </span>
+                        <span className="px-2 py-1 bg-gray-100 text-xs rounded-full font-medium">Nearby</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          className="flex-1 bg-primary-orange text-white text-sm py-2 px-3 rounded-xl font-medium hover:bg-orange-500"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleQuickRoute(
+                              '/add-pet',
+                              `Opening the report form for ${pet.name}.`,
+                              { initialStatus: 'found' }
+                            );
+                          }}
+                        >
+                          I Found It
+                        </button>
+                        <button
+                          className="flex-1 bg-blue-500 text-white text-sm py-2 px-3 rounded-xl font-medium hover:bg-blue-600"
+                          onClick={(e) => { e.stopPropagation(); handleVolunteerHelpSearch({ name: pet.name, location: pet.location }); }}
+                        >
+                          Help Search
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <div className="col-span-full text-center py-12 text-text-dark/60">No pets nearby right now</div>
+              )}
             </div>
           </div>
 

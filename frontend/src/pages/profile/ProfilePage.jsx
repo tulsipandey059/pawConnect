@@ -2,16 +2,18 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { usePets } from '../../context/PetContext';
 import PetCard from '../../components/pets/PetCard';
 import { mockAdoptionRequests } from '../../utils/mockData';
+import petService from '../../services/petService';
 
 const ProfilePage = () => {
-  const { currentUser, login, logout } = useAuth();
+  const { currentUser, updateCurrentUser, logout } = useAuth();
   const navigate = useNavigate();
-  const { pets } = usePets();
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({});
+  const [myPets, setMyPets] = useState([]);
+  const [myPetsLoading, setMyPetsLoading] = useState(true);
+  const [myPetsError, setMyPetsError] = useState('');
 
   // Mock user reports
   const myReports = [
@@ -19,19 +21,6 @@ const ProfilePage = () => {
     { id: 2, petName: 'Stray Kitten', status: 'Found', date: '2024-01-14' },
     { id: 3, petName: 'Bella', status: 'Lost', date: '2024-01-13' },
   ];
-
-  const ownerId = currentUser?.id ?? currentUser?._id;
-  const myPets = pets.filter((pet) => {
-    if (ownerId && pet.ownerId?.toString() === ownerId.toString()) {
-      return true;
-    }
-
-    if (currentUser?.email && pet.ownerEmail === currentUser.email) {
-      return true;
-    }
-
-    return false;
-  });
 
   useEffect(() => {
     if (currentUser) {
@@ -44,11 +33,53 @@ const ProfilePage = () => {
     }
   }, [currentUser]);
 
+  useEffect(() => {
+    let isActive = true;
+
+    const loadMyPets = async () => {
+      if (!currentUser) {
+        if (isActive) {
+          setMyPets([]);
+          setMyPetsLoading(false);
+          setMyPetsError('');
+        }
+        return;
+      }
+
+      try {
+        setMyPetsLoading(true);
+        setMyPetsError('');
+        const response = await petService.getMyPets();
+
+        if (isActive) {
+          setMyPets(response.pets || []);
+        }
+      } catch (loadError) {
+        console.error('Failed to load profile pets:', loadError);
+        if (isActive) {
+          setMyPets([]);
+          setMyPetsError(
+            loadError?.message || 'Could not load your pets right now.'
+          );
+        }
+      } finally {
+        if (isActive) {
+          setMyPetsLoading(false);
+        }
+      }
+    };
+
+    loadMyPets();
+
+    return () => {
+      isActive = false;
+    };
+  }, [currentUser?._id, currentUser?.id]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const updatedUser = { ...currentUser, ...formData };
-    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-    login(updatedUser);
+    updateCurrentUser(updatedUser);
     setEditMode(false);
   };
 
@@ -137,8 +168,17 @@ const ProfilePage = () => {
             {/* My Pets */}
             <div className="bg-white rounded-xl shadow p-6">
               <h2 className="text-2xl font-bold text-text-dark mb-6">My Pets</h2>
+              {myPetsError ? (
+                <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700">
+                  {myPetsError}
+                </div>
+              ) : null}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {myPets.length > 0 ? (
+                {myPetsLoading ? (
+                  <div className="col-span-full text-center py-12">
+                    <p className="text-xl text-text-dark/50">Loading your pets...</p>
+                  </div>
+                ) : myPets.length > 0 ? (
                   myPets.map(pet => (
                     <PetCard key={pet.id} pet={pet} />
                   ))

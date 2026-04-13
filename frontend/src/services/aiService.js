@@ -53,7 +53,7 @@ export const aiService = {
     };
   },
 
-  checkSimilarPets: async (imageInput, reportType = 'lost', filters = {}) => {
+  checkSimilarPets: async (imageInput, reportType = 'all', filters = {}) => {
     if (!imageInput) {
       return {
         success: true,
@@ -66,7 +66,7 @@ export const aiService = {
 
     return apiClient.post('/pets/similarity-search', {
       image,
-      reportType,
+      reportType: reportType || 'all',
       location: filters.location || '',
       type: filters.type || '',
       breed: filters.breed || '',

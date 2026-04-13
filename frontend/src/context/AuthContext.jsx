@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import authService from "../services/authService";
+import { clearStoredToken, getStoredToken } from '../utils/authStorage';
 
 const AuthContext = createContext();
 
@@ -19,7 +20,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = getStoredToken();
 
         if (!token) {
           setLoading(false);
@@ -33,7 +34,7 @@ export const AuthProvider = ({ children }) => {
         }
       } catch (error) {
         console.error("Auth error:", error);
-        localStorage.removeItem("token");
+        clearStoredToken();
         setCurrentUser(null);
       } finally {
         setLoading(false);
@@ -79,11 +80,17 @@ export const AuthProvider = ({ children }) => {
     window.dispatchEvent(new CustomEvent('logout'));
   };
 
+  const updateCurrentUser = (userData) => {
+    setCurrentUser(userData);
+    window.dispatchEvent(new CustomEvent('login', { detail: userData }));
+  };
+
   const value = {
     currentUser,
     login,
     register,
     logout,
+    updateCurrentUser,
     isAuthenticated: !!currentUser,
     loading
   };
