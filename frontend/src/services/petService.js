@@ -1,6 +1,6 @@
 import { API_BASE } from './api';
 import { petsData } from '../data/pets';
-import { getStoredToken } from '../utils/authStorage';
+import { getStoredToken, notifyAuthExpired } from '../utils/authStorage';
 
 const normalizeStatus = (status = '') => String(status).trim().toLowerCase();
 
@@ -109,9 +109,27 @@ const buildCreatePayload = (petData) => {
   return formData;
 };
 
-const getAuthHeader = () => {
+const getRequiredAuthHeader = () => {
   const token = getStoredToken();
-  return token ? { Authorization: `Bearer ${token}` } : {};
+
+  if (!token) {
+    const message = 'Your session has expired. Please log in again.';
+    notifyAuthExpired(message);
+    throw new Error(message);
+  }
+
+  return { Authorization: `Bearer ${token}` };
+};
+
+const createAuthError = (payload, status, fallbackMessage) => {
+  const message =
+    payload?.message || fallbackMessage || `Request failed with status ${status}. Please log in again.`;
+
+  if (status === 401) {
+    notifyAuthExpired(message);
+  }
+
+  return new Error(message);
 };
 
 export const petService = {
@@ -134,15 +152,17 @@ export const petService = {
   createPet: async (petData) => {
     const response = await fetch(`${API_BASE}/pets`, {
       method: 'POST',
-      headers: getAuthHeader(),
+      headers: getRequiredAuthHeader(),
       body: buildCreatePayload(petData),
     });
 
     const payload = await response.json().catch(() => null);
 
     if (!response.ok) {
-      throw new Error(
-        payload?.message || `Could not submit the report (${response.status}).`
+      throw createAuthError(
+        payload,
+        response.status,
+        `Could not submit the report (${response.status}).`
       );
     }
 
@@ -151,14 +171,16 @@ export const petService = {
 
   getMyPets: async () => {
     const response = await fetch(`${API_BASE}/pets/user/my-posts`, {
-      headers: getAuthHeader(),
+      headers: getRequiredAuthHeader(),
     });
 
     const payload = await response.json().catch(() => null);
 
     if (!response.ok) {
-      throw new Error(
-        payload?.message || `Could not load your pet reports (${response.status}).`
+      throw createAuthError(
+        payload,
+        response.status,
+        `Could not load your pet reports (${response.status}).`
       );
     }
 

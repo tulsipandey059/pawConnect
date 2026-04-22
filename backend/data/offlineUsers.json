@@ -30,7 +30,8 @@
     "city": "",
     "avatar": "",
     "createdAt": "2026-04-07T17:37:25.246Z",
-    "updatedAt": "2026-04-13T18:36:24.368Z"
+    "updatedAt": "2026-04-21T04:46:41.834Z",
+    "password": "$2b$10$8C4HQTaNGOO9ZM/aT/RrFuWtW3imy0WwRqccNIpF03Wj7BTUoYPWm"
   },
   {
     "_id": "69d234191682509c3374a857",
@@ -53,6 +54,7 @@
     "city": "",
     "avatar": "",
     "createdAt": "2026-04-13T18:24:06.333Z",
-    "updatedAt": "2026-04-13T18:36:15.610Z"
+    "updatedAt": "2026-04-21T08:50:48.614Z",
+    "password": "$2b$10$X9LmJ3EFSakegRItxuFT9uVlLOBmRpPhtL1FZR/Lki7LbuMLEMrE2"
   }
 ]

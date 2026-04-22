@@ -1,4 +1,7 @@
 const mongoose = require('mongoose');
+const dns = require('dns');
+
+dns.setServers(["1.1.1.1", "8.8.8.8"]);
 
 let isConnected = false;
 
@@ -13,6 +16,7 @@ const connectDB = async () => {
         retryWrites: true,
         w: 'majority',
         bufferCommands: true,
+        family: 4
       }),
       new Promise((_, reject) =>
         setTimeout(() => reject(new Error('MongoDB connection timeout')), 5500)

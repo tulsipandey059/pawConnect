@@ -5,20 +5,32 @@ import {
   setStoredToken,
 } from "../utils/authStorage";
 
+const extractToken = (response) => response?.token || response?.data?.token || "";
+
 const authService = {
   register: async (userData) => {
     const response = await apiClient.post("/auth/register", userData);
-    if (response.token) {
-      setStoredToken(response.token);
+
+    const token = extractToken(response);
+    if (token) {
+      setStoredToken(token);
+    } else if (response?.success) {
+      throw new Error("Authentication succeeded, but no token was returned.");
     }
+
     return response;
   },
 
   login: async (userData) => {
     const response = await apiClient.post("/auth/login", userData);
-    if (response.token) {
-      setStoredToken(response.token);
+
+    const token = extractToken(response);
+    if (token) {
+      setStoredToken(token);
+    } else if (response?.success) {
+      throw new Error("Authentication succeeded, but no token was returned.");
     }
+
     return response;
   },
 
@@ -27,14 +39,14 @@ const authService = {
   },
 
   getMe: async () => {
-    const token = getStoredToken();
+    if (!getStoredToken()) {
+      throw new Error("No active session found.");
+    }
 
     const response = await fetch(`${API_BASE}/auth/me`, {
-      headers: token
-        ? {
-            Authorization: `Bearer ${token}`,
-          }
-        : {},
+      headers: {
+        Authorization: `Bearer ${getStoredToken()}`,
+      },
     });
 
     if (!response.ok) {

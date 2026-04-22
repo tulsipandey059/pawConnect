@@ -1,6 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import authService from "../services/authService";
-import { clearStoredToken, getStoredToken } from '../utils/authStorage';
+import {
+  AUTH_EXPIRED_EVENT,
+  clearStoredToken,
+  getStoredToken,
+} from '../utils/authStorage';
 
 const AuthContext = createContext();
 
@@ -42,6 +46,20 @@ export const AuthProvider = ({ children }) => {
     };
 
     fetchUser();
+  }, []);
+
+  useEffect(() => {
+    const handleAuthExpired = () => {
+      clearStoredToken();
+      setCurrentUser(null);
+      setLoading(false);
+    };
+
+    window.addEventListener(AUTH_EXPIRED_EVENT, handleAuthExpired);
+
+    return () => {
+      window.removeEventListener(AUTH_EXPIRED_EVENT, handleAuthExpired);
+    };
   }, []);
 
   const login = async (credentials) => {
